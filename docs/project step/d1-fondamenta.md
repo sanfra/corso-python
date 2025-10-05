@@ -280,17 +280,17 @@ studente = True
 
 ### 6.1 Tipi fondamentali
 
-| Tipo         | Nome completo           | Esempio                          | Descrizione                                    |
-| ------------ | ----------------------- | -------------------------------- | ---------------------------------------------- |
-| `int`      | intero                  | `10`                           | Numeri senza decimali                          |
-| `float`    | numero a virgola mobile | `3.14`                         | Numeri con decimali                            |
-| `str`      | stringa                 | `"ciao"`                       | Testo tra virgolette (singole o doppie)        |
-| `bool`     | booleano                | `True`,`False`               | Valore logico                                  |
-| `list`     | lista                   | `[1, 2, 3]`                    | Collezione ordinata e modificabile             |
-| `tuple`    | tupla                   | `(1, 2, 3)`                    | Collezione ordinata e**non**modificabile |
-| `set`      | insieme                 | `{1, 2, 3}`                    | Collezione**senza duplicati**            |
-| `dict`     | dizionario              | `{"nome": "Alice", "eta": 25}` | Coppie chiave-valore                           |
-| `NoneType` | None                    | `None`                         | Valore nullo/assenza di valore                 |
+| Tipo         | Nome completo           | Esempio                          | Descrizione                                      |
+| ------------ | ----------------------- | -------------------------------- | ------------------------------------------------ |
+| `int`      | intero                  | `10`                           | Numeri senza decimali                            |
+| `float`    | numero a virgola mobile | `3.14`                         | Numeri con decimali                              |
+| `str`      | stringa                 | `"ciao"`                       | Testo tra virgolette (singole o doppie)          |
+| `bool`     | booleano                | `True`,`False`               | Valore logico                                    |
+| `list`     | lista                   | `[1, 2, 3]`                    | Collezione ordinata e modificabile               |
+| `tuple`    | tupla                   | `(1, 2, 3)`                    | Collezione ordinata e**non** modificabile |
+| `set`      | insieme                 | `{1, 2, 3}`                    | Collezione **senza duplicati**             |
+| `dict`     | dizionario              | `{"nome": "Alice", "eta": 25}` | Coppie chiave-valore                             |
+| `NoneType` | None                    | `None`                         | Valore nullo/assenza di valore                   |
 
 ### 6.2 Verificare il tipo di una variabile
 
@@ -1117,7 +1117,7 @@ def indovina_numero():
         # Input utente
         tentativo = int(input("Il tuo numero: "))
         tentativi += 1
-      
+    
         # Controlla se ha indovinato
         if tentativo == numero_segreto:
             print(f"Complimenti! Hai indovinato in {tentativi} tentativi!")
