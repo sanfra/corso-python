@@ -47,7 +47,7 @@ Experienced in building and mentoring high-performing teams, aligning technology
 
 **Durata:** 4 giorni (32 ore totali - 8 ore per giorno)
 
-**Livello:** Da principiante a intermedio avanzato
+**Livello:** base-intermedio
 
 **Prerequisiti:** Conoscenza base di programmazione in altri linguaggi (preferibile ma non obbligatorio)
 
@@ -202,6 +202,10 @@ Experienced in building and mentoring high-performing teams, aligning technology
 
 ### Mattina (4 ore)
 
+**Ripasso e preparazione esame (1 ora)**
+
+**Esame finale (1 ora)**
+
 **Modulo 4.1 - Panoramica Framework Web (1 ora)**
 
 * **Flask:** microframework, pro/contro, casi d'uso
@@ -210,7 +214,7 @@ Experienced in building and mentoring high-performing teams, aligning technology
 * Tabella comparativa e decision tree
 * **Demo live:** stesso endpoint in Flask/Django/FastAPI
 
-**Modulo 4.2 - Database e ORM (3 ore)**
+**Modulo 4.2 - Database e ORM (1 ora)**
 
 * Introduzione database relazionali
 * **SQLite:** operazioni CRUD, context manager
