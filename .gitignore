@@ -1,0 +1,210 @@
+# ============================================
+# VIRTUAL ENVIRONMENT
+# ============================================
+# Non committare MAI il virtual environment!
+# Ogni sviluppatore deve creare il proprio
+venv_pww/
+venv/
+env/
+ENV/
+.venv/
+.env/
+
+# ============================================
+# DATABASE
+# ============================================
+# Non committare il database locale
+# Contiene dati di sviluppo e potrebbe essere grande
+*.sqlite3
+db.sqlite3
+*.db
+
+# ============================================
+# PYTHON
+# ============================================
+# File compilati Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+
+# File C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit test / coverage
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# ============================================
+# DJANGO
+# ============================================
+# Log files
+*.log
+
+# File di configurazione locale (può contenere password)
+local_settings.py
+db.sqlite3-journal
+
+# Media files (upload degli utenti)
+# Committare solo se necessario per il corso
+/media/
+media/
+
+# Static files raccolti (generati da collectstatic)
+/static/
+staticfiles/
+
+# File di migrazione locale (opzionale)
+# Togli il commento se non vuoi versionare le migrazioni
+# */migrations/*.py
+# !*/migrations/__init__.py
+
+# ============================================
+# IDE / EDITOR
+# ============================================
+# Visual Studio Code
+.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# PyCharm
+.idea/
+.idea/*
+*.iml
+*.iws
+*.ipr
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+.vim/
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+
+# ============================================
+# SISTEMA OPERATIVO
+# ============================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+
+# ============================================
+# ENVIRONMENT VARIABLES
+# ============================================
+# File con variabili d'ambiente sensibili
+.env
+.env.local
+.env.*.local
+*.env
+
+# ============================================
+# DOCUMENTI / NOTE PERSONALI
+# ============================================
+# Note personali degli sviluppatori
+notes.txt
+TODO.txt
+.notes/
+
+# ============================================
+# BACKUP
+# ============================================
+# File di backup
+*.bak
+*.backup
+*.old
+*.orig
+
+# ============================================
+# JUPYTER NOTEBOOK (se usati)
+# ============================================
+.ipynb_checkpoints
+*.ipynb_checkpoints/
+
+# ============================================
+# NODE MODULES (se usi frontend con npm)
+# ============================================
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# ============================================
+# COSA COMMITTARE (riferimento)
+# ============================================
+# ✅ Committare:
+# - manage.py
+# - requirements.txt
+# - pww/ (cartella progetto Django)
+# - api/ (cartella app)
+# - setup.py
+# - README.md
+# - .gitignore
+# - File di configurazione del progetto
+# - Template HTML
+# - File statici CSS/JS di base
+# - Migrazioni Django (migrations/)
+#
+# ❌ NON committare:
+# - venv_pww/ (virtual environment)
+# - db.sqlite3 (database locale)
+# - __pycache__/ (file compilati)
+# - .env (variabili d'ambiente)
+# - .idea/, .vscode/ (configurazioni IDE)
+# - *.log (file di log)
+# - media/ (upload utenti)
+# - static/ (file statici raccolti)
