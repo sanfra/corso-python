@@ -1,4 +1,3 @@
-
 # 🐍 Corso Python – Giorno 2
 
 ## Lezione 2: Strutture Dati e Strumenti di Lavoro
@@ -417,6 +416,10 @@ Le stringhe in Python sono  **immutabili** : ogni operazione crea una nuova stri
 ### 2.1 Creazione e operazioni base
 
 ```python
+
+
+
+
 # Creazione di stringhe
 testo1 = "Ciao"
 testo2 = 'Mondo'
@@ -443,6 +446,20 @@ print(saluto[0:4])   # 'Ciao'
 print(saluto[5:])    # 'Mondo'
 print(saluto[::-1])  # 'odnuM oaiC' (invertita)
 ```
+
+python
+
+```python
+saluto[::-1]
+       ││ │
+       ││ └─ passo =-1(vai indietro di 1)
+       │└─ fine = vuoto (vai fino all'inizio)
+       └─ inizio = vuoto (parti dalla fine)
+```
+
+* **Nessun inizio** = parti dall'ultimo carattere
+* **Nessuna fine** = vai fino al primo carattere
+* **Passo -1** = procedi all'indietro]]
 
 ### 2.2 Metodi delle stringhe
 
@@ -562,6 +579,9 @@ print("Ha detto: \"Ciao\"")
 path = r"C:\Users\nome\Documents"  # il carattere r prima della stringa
 print(path)
 ```
+
+### 2.6 Regex 
+
 
 ---
 
@@ -1242,24 +1262,24 @@ def analizza_file(nome_file):
         with open(nome_file, "r", encoding="utf-8") as f:
             # Legge tutto il contenuto
             contenuto = f.read()
-          
+        
             # Conta caratteri
             num_caratteri = len(contenuto)
-          
+        
             # Conta righe
             righe = contenuto.split("\n")
             num_righe = len(righe)
-          
+        
             # Conta parole
             parole = contenuto.split()
             num_parole = len(parole)
-          
+        
             # Stampa risultati
             print(f"File: {nome_file}")
             print(f"Righe: {num_righe}")
             print(f"Parole: {num_parole}")
             print(f"Caratteri: {num_caratteri}")
-          
+        
     except FileNotFoundError:
         print(f"Errore: il file '{nome_file}' non esiste")
     except Exception as e:
@@ -1318,17 +1338,17 @@ def mostra_prima_colonna(nome_file):
     try:
         with open(nome_file, "r", encoding="utf-8") as file:
             lettore = csv.reader(file)
-          
+        
             # Salta intestazioni (opzionale)
             intestazioni = next(lettore)
             print(f"Prima colonna: {intestazioni[0]}")
             print("-" * 30)
-          
+        
             # Stampa prima colonna di ogni riga
             for riga in lettore:
                 if riga:  # ignora righe vuote
                     print(riga[0])
-                  
+                
     except FileNotFoundError:
         print(f"File '{nome_file}' non trovato")
     except Exception as e:
@@ -1435,7 +1455,7 @@ class Rubrica:
         if not self.contatti:
             print("Rubrica vuota")
             return
-      
+    
         print("\n=== RUBRICA ===")
         for nome, telefono in sorted(self.contatti.items()):
             print(f"{nome}: {telefono}")
@@ -1452,29 +1472,29 @@ def menu():
         print("3. Elimina contatto")
         print("4. Elenca tutti")
         print("5. Esci")
-      
+    
         scelta = input("\nScegli un'opzione: ")
-      
+    
         if scelta == "1":
             nome = input("Nome: ")
             telefono = input("Telefono: ")
             rubrica.aggiungi(nome, telefono)
-      
+    
         elif scelta == "2":
             nome = input("Nome da cercare: ")
             rubrica.cerca(nome)
-      
+    
         elif scelta == "3":
             nome = input("Nome da eliminare: ")
             rubrica.elimina(nome)
-      
+    
         elif scelta == "4":
             rubrica.elenca()
-      
+    
         elif scelta == "5":
             print("Arrivederci!")
             break
-      
+    
         else:
             print("Opzione non valida!")
 
@@ -1500,12 +1520,12 @@ def analizza_vendite(file_csv):
   
     with open(file_csv, "r", encoding="utf-8") as f:
         lettore = csv.DictReader(f)
-      
+    
         for riga in lettore:
             prodotto = riga["prodotto"]
             importo = float(riga["importo"])
             mese = riga["mese"]
-          
+        
             # Accumula vendite
             vendite_per_prodotto[prodotto] += importo
             vendite_per_mese[mese] += importo
@@ -1584,13 +1604,13 @@ public class FindDuplicates {
         int[] numbers = {1, 2, 3, 2, 4, 5, 3};
         Set<Integer> seen = new HashSet<>();
         Set<Integer> duplicates = new HashSet<>();
-      
+    
         for (int num : numbers) {
             if (!seen.add(num)) {
                 duplicates.add(num);
             }
         }
-      
+    
         System.out.println(duplicates);
     }
 }

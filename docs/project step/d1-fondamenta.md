@@ -288,7 +288,7 @@ studente = True
 | `bool`     | booleano                | `True`,`False`               | Valore logico                                    |
 | `list`     | lista                   | `[1, 2, 3]`                    | Collezione ordinata e modificabile               |
 | `tuple`    | tupla                   | `(1, 2, 3)`                    | Collezione ordinata e**non** modificabile |
-| `set`      | insieme                 | `{1, 2, 3}`                    | Collezione **senza duplicati**             |
+| `set`      | insieme                 | `{1, 2, 3}`                    | Collezione**senza duplicati**              |
 | `dict`     | dizionario              | `{"nome": "Alice", "eta": 25}` | Coppie chiave-valore                             |
 | `NoneType` | None                    | `None`                         | Valore nullo/assenza di valore                   |
 
@@ -1117,7 +1117,7 @@ def indovina_numero():
         # Input utente
         tentativo = int(input("Il tuo numero: "))
         tentativi += 1
-    
+  
         # Controlla se ha indovinato
         if tentativo == numero_segreto:
             print(f"Complimenti! Hai indovinato in {tentativi} tentativi!")
@@ -1179,8 +1179,8 @@ Nel **Giorno 2** approfondiremo:
 ### Compiti per casa (opzionali)
 
 1. Rifare tutti gli esercizi visti oggi senza guardare le soluzioni
-2. Creare una funzione che verifichi se una parola è palindroma (es. "anna")
-3. Scrivere un programma che calcoli il fattoriale di un numero usando sia cicli che ricorsione
+2. Creare una funzione che verifichi se una parola è palindroma (es. "anna") tips len(`<str>`) 
+3. Scrivere un programma che calcoli il fattoriale di un numero usando sia cicli che ricorsione (il prodotto di tutti i numeri interi positivi da 1 a n)
 4. Esplorare la documentazione Python: [docs.python.org](https://docs.python.org/3/)
 
 ---
