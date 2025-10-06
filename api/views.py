@@ -1,15 +1,19 @@
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from rest_framework import status
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
+from datetime import datetime
 
-@api_view(['GET'])
+# View che accetta GET (hello)
 def hello_world(request):
-    """
-    API endpoint semplice che risponde con un messaggio
-    """
-    data = {
-        'message': 'Hello from PWW API!',
-        'method': request.method,
-        'path': request.path,
-    }
-    return Response(data, status=status.HTTP_200_OK)
+    return JsonResponse({'message': 'Hello World!'})
+
+# View che accetta solo POST (hello2)
+@csrf_exempt  # Solo per testing! In produzione usa il CSRF token
+@require_http_methods(["POST"])
+@csrf_exempt
+@require_http_methods(["POST"])
+def hello_world_post(request):
+    return JsonResponse({
+        'message': 'Hello from POST!',
+        'timestamp': datetime.now().isoformat()
+    })
