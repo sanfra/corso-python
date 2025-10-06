@@ -208,3 +208,4 @@ yarn-error.log
 # - *.log (file di log)
 # - media/ (upload utenti)
 # - static/ (file statici raccolti)
+*.DS_Store
