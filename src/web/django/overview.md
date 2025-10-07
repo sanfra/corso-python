@@ -1,3 +1,96 @@
+# Quick setup:
+
+
+## Creazione del progetto:
+
+bash
+
+```bash
+python setup.py
+```
+
+
+## Avvio del progetto
+
+comandi per attivare l'ambiente virtuale e avviare Django:
+
+## Su Windows
+
+bash
+
+```bash
+# 1. Attiva l'ambiente virtuale
+venv\Scripts\activate
+
+# 2. Avvia il server Django
+python manage.py runserver
+```
+
+## Su macOS/Linux
+
+bash
+
+```bash
+# 1. Attiva l'ambiente virtuale
+source venv/bin/activate
+
+# 2. Avvia il server Django
+python manage.py runserver
+```
+
+
+## Comandi principali per le migrazioni
+
+### 1. **Creare le migrazioni** (dopo aver modificato i models)
+
+bash
+
+```bash
+python manage.py makemigrations
+```
+
+Questo comando:
+
+* Analizza i cambiamenti nei file `models.py`
+* Crea file di migrazione nella cartella `migrations/`
+* Ti mostra cosa verrà modificato
+
+### 2. **Applicare le migrazioni al database**
+
+bash
+
+```bash
+python manage.py migrate
+```
+
+
+
+Questo comando:
+
+* Esegue le migrazioni pendenti
+* Modifica effettivamente il database
+* Crea/modifica/elimina tabelle e colonne
+
+### 3. **Vedere lo stato delle migrazioni**
+
+bash
+
+```bash
+python manage.py showmigrations
+```
+
+Mostra quali migrazioni sono state applicate (con [X]) e quali no (con [ ])
+
+### 4. **Vedere il SQL generato** (senza eseguirlo)
+
+bash
+
+```bash
+python manage.py sqlmigrate nome_app 0001
+```
+
+Mostra il codice SQL che verrà eseguito per quella migrazione
+
 # Guida Python: Virtual Environment, Requirements e Django (Windows)
 
 ## 🎯 Progetto: PWW (Python Web Workshop)
@@ -41,14 +134,25 @@ venv_pww\Scripts\Activate.ps1
 
 python manage.py runserver  
 
-crtl+c > stop server
+# crtl+c > stop server
 
+#disattivare venv
 deactivate
 
+#ORM
+
+python manage.py makemigrations
+
+#creazione super user:
+python manage.py createsuperuser
 
 ```
 
- **Nota PowerShell** : Se ricevi un errore di policy, esegui:
+#creazione super user:
+
+python manage.py createsuperuser
+
+**Nota PowerShell** : Se ricevi un errore di policy, esegui:
 
 ```powershell
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
