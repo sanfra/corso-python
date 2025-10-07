@@ -38,6 +38,14 @@ venv_pww\Scripts\activate
 
 # PowerShell
 venv_pww\Scripts\Activate.ps1
+
+python manage.py runserver  
+
+crtl+c > stop server
+
+deactivate
+
+
 ```
 
  **Nota PowerShell** : Se ricevi un errore di policy, esegui:
