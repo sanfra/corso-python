@@ -18,7 +18,7 @@ bash
 
 ```bash
 # 1. Attiva l'ambiente virtuale
-venv\Scripts\activate
+ pww_venv\Scripts\activate
 
 # 2. Avvia il server Django
 python manage.py runserver
@@ -30,7 +30,7 @@ bash
 
 ```bash
 # 1. Attiva l'ambiente virtuale
-source venv/bin/activate
+source  pww_venv/bin/activate
 
 # 2. Avvia il server Django
 python manage.py runserver
