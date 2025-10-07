@@ -1,21 +1,11 @@
 {
 	"info": {
+		"_postman_id": "c2f306d4-2626-4fbb-afda-1ca75869235c",
 		"name": "PWW Django API - Software Collection",
 		"description": "Collection completa per testare tutte le API del progetto Django Software",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "42912126"
 	},
-	"variable": [
-		{
-			"key": "base_url",
-			"value": "http://localhost:8000",
-			"type": "string"
-		},
-		{
-			"key": "software_id",
-			"value": "1",
-			"type": "string"
-		}
-	],
 	"item": [
 		{
 			"name": "Hello Endpoints",
@@ -109,6 +99,64 @@
 				},
 				{
 					"name": "Crea Software (POST)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Photoshop\",\n  \"versione\": \"25.0\",\n  \"produttore\": \"Adobe\",\n  \"prezzo\": \"239.88\",\n  \"gratuito\": false,\n  \"data_rilascio\": \"2024-10-01\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/software/create/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"software",
+								"create",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Crea Software MS Free",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"DBEaver\",\n  \"versione\": \"10.0\",\n  \"produttore\": \"JetBrain\",\n  \"prezzo\": \"00\",\n  \"gratuito\": true,\n  \"data_rilascio\": \"2023-10-01\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/software/create/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"software",
+								"create",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Crea Software MS (POST) Copy",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -264,6 +312,18 @@
 					"response": []
 				}
 			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		},
+		{
+			"key": "software_id",
+			"value": "1",
+			"type": "string"
 		}
 	]
 }
