@@ -1,5 +1,6 @@
 # --- IMPORTAZIONI DJANGO REST FRAMEWORK ---
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view,permission_classes, authentication_classes
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -552,7 +553,10 @@ def statistiche_azienda(request, azienda_id):
 # ============================================
 
 @api_view(['GET'])
+@permission_classes([AllowAny])   # rende pubblico
+@authentication_classes([])       # opzionale: salta parsing token
 def hello_world(request):
+    
     """GET /api/hello/ - Endpoint di test"""
     data = {
         'message': 'Hello from PWW API!',

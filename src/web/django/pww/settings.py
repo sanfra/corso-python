@@ -41,8 +41,8 @@ INSTALLED_APPS = [
 
     # DRF
     'rest_framework',
-    'rest_framework.authtoken',  # disabile se usi solo JWT
-    'rest_framework_simplejwt',  # JSON Web Token (JWT)
+    'rest_framework.authtoken',  # disabile 
+    'rest_framework_simplejwt',  # JSON Web Token (JWT) > stateless
     'rest_framework_simplejwt.token_blacklist',
     'api',
 ]
@@ -133,7 +133,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # Configurazione REST Framework
-REST_FRAMEWORK_default = {
+REST_FRAMEWORK_disable = {
     # Autenticazione di default
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',  # Token
@@ -164,8 +164,8 @@ REST_FRAMEWORK = {
 from datetime import timedelta
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # Token valido per 60 minuti
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),     # Refresh valido per 7 giorni
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=1),  # Token valido per 60 minuti
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),     # Refresh valido per 7 giorni
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
     'UPDATE_LAST_LOGIN': True,
