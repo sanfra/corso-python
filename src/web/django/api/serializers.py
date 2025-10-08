@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import Software, Azienda
 
 
+
 # ============================================
 # SERIALIZER AZIENDA
 # ============================================

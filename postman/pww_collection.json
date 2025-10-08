@@ -1,181 +1,149 @@
 {
 	"info": {
+		"_postman_id": "644034ee-74ba-4f17-b018-930639da632c",
 		"name": "Django Software API - Complete Collection with JWT Auth",
 		"description": "Collection completa per testare tutte le API del progetto Django con Aziende e Software - Include autenticazione JWT",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-	},
-	"variable": [
-		{
-			"key": "base_url",
-			"value": "http://localhost:8000",
-			"type": "string"
-		},
-		{
-			"key": "access_token",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "refresh_token",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "azienda_id",
-			"value": "1",
-			"type": "string"
-		},
-		{
-			"key": "software_id",
-			"value": "1",
-			"type": "string"
-		}
-	],
-	"auth": {
-		"type": "bearer",
-		"bearer": [
-			{
-				"key": "token",
-				"value": "{{access_token}}",
-				"type": "string"
-			}
-		]
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "42912126"
 	},
 	"item": [
 		{
-				"name": "0. AUTENTICAZIONE JWT",
-				"item": [
-					{
-						"name": "Login (Ottieni JWT Token)",
-						"event": [
+			"name": "0. AUTENTICAZIONE JWT",
+			"item": [
+				{
+					"name": "Login (Ottieni JWT Token)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set(\"access_token\", jsonData.access);",
+									"    pm.collectionVariables.set(\"refresh_token\", jsonData.refresh);",
+									"    console.log(\"✅ Token JWT salvati con successo!\");",
+									"    console.log(\"Access Token: \" + jsonData.access.substring(0, 50) + \"...\");",
+									"    console.log(\"Refresh Token: \" + jsonData.refresh.substring(0, 50) + \"...\");",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
 							{
-								"listen": "test",
-								"script": {
-									"exec": [
-										"if (pm.response.code === 200) {",
-										"    var jsonData = pm.response.json();",
-										"    pm.collectionVariables.set(\"access_token\", jsonData.access);",
-										"    pm.collectionVariables.set(\"refresh_token\", jsonData.refresh);",
-										"    console.log(\"✅ Token JWT salvati con successo!\");",
-										"    console.log(\"Access Token: \" + jsonData.access.substring(0, 50) + \"...\");",
-										"    console.log(\"Refresh Token: \" + jsonData.refresh.substring(0, 50) + \"...\");",
-										"}"
-									],
-									"type": "text/javascript"
-								}
+								"key": "Content-Type",
+								"value": "application/json"
 							}
 						],
-						"request": {
-							"auth": {
-								"type": "noauth"
-							},
-							"method": "POST",
-							"header": [
-								{
-									"key": "Content-Type",
-									"value": "application/json"
-								}
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/token/",
+							"host": [
+								"{{base_url}}"
 							],
-							"body": {
-								"mode": "raw",
-								"raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}"
-							},
-							"url": {
-								"raw": "{{base_url}}/api/token/",
-								"host": [
-									"{{base_url}}"
-								],
-								"path": [
-									"api",
-									"token",
-									""
-								]
-							},
-							"description": "POST /api/token/ - Login e ottieni access e refresh token JWT.\n\nRisposta:\n{\n  \"access\": \"eyJ0eXAiOiJKV1QiLCJhbGc...\",\n  \"refresh\": \"eyJ0eXAiOiJKV1QiLCJhbGc...\"\n}"
-						}
+							"path": [
+								"api",
+								"token",
+								""
+							]
+						},
+						"description": "POST /api/token/ - Login e ottieni access e refresh token JWT.\n\nRisposta:\n{\n  \"access\": \"eyJ0eXAiOiJKV1QiLCJhbGc...\",\n  \"refresh\": \"eyJ0eXAiOiJKV1QiLCJhbGc...\"\n}"
 					},
-					{
-						"name": "Refresh Token",
-						"event": [
+					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set(\"access_token\", jsonData.access);",
+									"    console.log(\"✅ Access token aggiornato!\");",
+									"    console.log(\"Nuovo Access Token: \" + jsonData.access.substring(0, 50) + \"...\");",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
 							{
-								"listen": "test",
-								"script": {
-									"exec": [
-										"if (pm.response.code === 200) {",
-										"    var jsonData = pm.response.json();",
-										"    pm.collectionVariables.set(\"access_token\", jsonData.access);",
-										"    console.log(\"✅ Access token aggiornato!\");",
-										"    console.log(\"Nuovo Access Token: \" + jsonData.access.substring(0, 50) + \"...\");",
-										"}"
-									],
-									"type": "text/javascript"
-								}
+								"key": "Content-Type",
+								"value": "application/json"
 							}
 						],
-						"request": {
-							"auth": {
-								"type": "noauth"
-							},
-							"method": "POST",
-							"header": [
-								{
-									"key": "Content-Type",
-									"value": "application/json"
-								}
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"refresh\": \"{{refresh_token}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/token/refresh/",
+							"host": [
+								"{{base_url}}"
 							],
-							"body": {
-								"mode": "raw",
-								"raw": "{\n  \"refresh\": \"{{refresh_token}}\"\n}"
-							},
-							"url": {
-								"raw": "{{base_url}}/api/token/refresh/",
-								"host": [
-									"{{base_url}}"
-								],
-								"path": [
-									"api",
-									"token",
-									"refresh",
-									""
-								]
-							},
-							"description": "POST /api/token/refresh/ - Rinnova l'access token quando scade usando il refresh token.\n\nUsare quando ricevi errore 401 per token scaduto."
-						}
+							"path": [
+								"api",
+								"token",
+								"refresh",
+								""
+							]
+						},
+						"description": "POST /api/token/refresh/ - Rinnova l'access token quando scade usando il refresh token.\n\nUsare quando ricevi errore 401 per token scaduto."
 					},
-					{
-						"name": "Verifica Token",
-						"request": {
-							"auth": {
-								"type": "noauth"
-							},
-							"method": "POST",
-							"header": [
-								{
-									"key": "Content-Type",
-									"value": "application/json"
-								}
+					"response": []
+				},
+				{
+					"name": "Verifica Token",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"token\": \"{{access_token}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/token/verify/",
+							"host": [
+								"{{base_url}}"
 							],
-							"body": {
-								"mode": "raw",
-								"raw": "{\n  \"token\": \"{{access_token}}\"\n}"
-							},
-							"url": {
-								"raw": "{{base_url}}/api/token/verify/",
-								"host": [
-									"{{base_url}}"
-								],
-								"path": [
-									"api",
-									"token",
-									"verify",
-									""
-								]
-							},
-							"description": "POST /api/token/verify/ - Verifica se l'access token è ancora valido.\n\nRitorna 200 se valido, 401 se scaduto o invalido."
-						}
-					}
-				]
-			},
+							"path": [
+								"api",
+								"token",
+								"verify",
+								""
+							]
+						},
+						"description": "POST /api/token/verify/ - Verifica se l'access token è ancora valido.\n\nRitorna 200 se valido, 401 se scaduto o invalido."
+					},
+					"response": []
+				}
+			]
+		},
 		{
 			"name": "1. Test Endpoints",
 			"item": [
@@ -196,7 +164,8 @@
 							]
 						},
 						"description": "Endpoint di test base"
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Hello POST",
@@ -220,7 +189,8 @@
 							]
 						},
 						"description": "Test endpoint POST"
-					}
+					},
+					"response": []
 				}
 			]
 		},
@@ -250,7 +220,8 @@
 							]
 						},
 						"description": "GET /api/aziende/ - Restituisce tutte le aziende con conteggio software"
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Dettaglio Azienda",
@@ -276,7 +247,8 @@
 							]
 						},
 						"description": "GET /api/aziende/<id>/ - Dettagli di una singola azienda"
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Crea Azienda (Adobe)",
@@ -310,7 +282,8 @@
 							]
 						},
 						"description": "POST /api/aziende/create/ - Crea Adobe"
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Crea Azienda (Microsoft)",
@@ -344,7 +317,8 @@
 							]
 						},
 						"description": "POST /api/aziende/create/ - Crea Microsoft"
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Crea Azienda (JetBrains)",
@@ -378,7 +352,8 @@
 							]
 						},
 						"description": "POST /api/aziende/create/ - Crea JetBrains"
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Aggiorna Azienda (PUT)",
@@ -413,7 +388,8 @@
 							]
 						},
 						"description": "PUT /api/aziende/<id>/update/ - Aggiorna tutti i campi"
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Aggiorna Azienda Parziale (PATCH)",
@@ -448,7 +424,8 @@
 							]
 						},
 						"description": "PATCH /api/aziende/<id>/patch/ - Aggiorna solo alcuni campi"
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Elimina Azienda (DELETE)",
@@ -475,7 +452,8 @@
 							]
 						},
 						"description": "DELETE /api/aziende/<id>/delete/ - Elimina azienda e tutti i suoi software (CASCADE)"
-					}
+					},
+					"response": []
 				}
 			]
 		},
@@ -505,7 +483,8 @@
 							]
 						},
 						"description": "GET /api/software/ - Lista tutti i software con info azienda"
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Dettaglio Software",
@@ -531,7 +510,8 @@
 							]
 						},
 						"description": "GET /api/software/<id>/ - Dettagli di un singolo software"
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Crea Software (Photoshop - Adobe)",
@@ -565,7 +545,8 @@
 							]
 						},
 						"description": "POST /api/software/create/ - Crea Photoshop per Adobe (azienda_id=1)"
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Crea Software (Illustrator - Adobe)",
@@ -599,7 +580,8 @@
 							]
 						},
 						"description": "POST /api/software/create/ - Crea Illustrator per Adobe"
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Crea Software (VS Code - Microsoft)",
@@ -633,7 +615,8 @@
 							]
 						},
 						"description": "POST /api/software/create/ - Crea VS Code per Microsoft (azienda_id=2)"
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Crea Software (IntelliJ IDEA - JetBrains)",
@@ -667,7 +650,8 @@
 							]
 						},
 						"description": "POST /api/software/create/ - Crea IntelliJ per JetBrains (azienda_id=3)"
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Aggiorna Software (PUT)",
@@ -702,7 +686,8 @@
 							]
 						},
 						"description": "PUT /api/software/<id>/update/ - Aggiorna tutti i campi"
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Aggiorna Software Parziale (PATCH)",
@@ -737,7 +722,8 @@
 							]
 						},
 						"description": "PATCH /api/software/<id>/patch/ - Aggiorna solo alcuni campi"
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Elimina Software (DELETE)",
@@ -764,7 +750,8 @@
 							]
 						},
 						"description": "DELETE /api/software/<id>/delete/ - Elimina software"
-					}
+					},
+					"response": []
 				}
 			]
 		},
@@ -796,7 +783,8 @@
 							]
 						},
 						"description": "GET /api/aziende/<id>/software/ - Tutti i software di una specifica azienda"
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Software di Adobe",
@@ -823,7 +811,8 @@
 							]
 						},
 						"description": "GET /api/aziende/1/software/ - Software prodotti da Adobe"
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Software di Microsoft",
@@ -850,7 +839,8 @@
 							]
 						},
 						"description": "GET /api/aziende/2/software/ - Software prodotti da Microsoft"
-					}
+					},
+					"response": []
 				}
 			]
 		},
@@ -881,7 +871,8 @@
 							]
 						},
 						"description": "GET /api/software/gratuiti/ - Solo software con gratuito=true"
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Software a Pagamento",
@@ -907,7 +898,8 @@
 							]
 						},
 						"description": "GET /api/software/pagamento/ - Solo software con gratuito=false"
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Cerca Software (per nome)",
@@ -940,7 +932,8 @@
 							]
 						},
 						"description": "GET /api/software/cerca/?q=photo - Cerca 'photo' in nome software o nome azienda"
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Cerca Software (Adobe)",
@@ -972,7 +965,8 @@
 							]
 						},
 						"description": "GET /api/software/cerca/?q=adobe - Cerca software di Adobe"
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Filtra per Prezzo (0-100)",
@@ -1010,7 +1004,8 @@
 							]
 						},
 						"description": "GET /api/software/filtra/?min=0&max=100 - Software con prezzo tra €0 e €100"
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Filtra per Prezzo (100-250)",
@@ -1046,7 +1041,8 @@
 							]
 						},
 						"description": "GET /api/software/filtra/?min=100&max=250 - Software con prezzo tra €100 e €250"
-					}
+					},
+					"response": []
 				}
 			]
 		},
@@ -1076,7 +1072,8 @@
 							]
 						},
 						"description": "GET /api/statistiche/ - Statistiche generali su aziende e software"
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Statistiche Azienda",
@@ -1103,7 +1100,8 @@
 							]
 						},
 						"description": "GET /api/aziende/<id>/statistiche/ - Statistiche dettagliate per una specifica azienda"
-					}
+					},
+					"response": []
 				},
 				{
 					"name": "Statistiche Adobe",
@@ -1130,9 +1128,47 @@
 							]
 						},
 						"description": "GET /api/aziende/1/statistiche/ - Statistiche software Adobe"
-					}
+					},
+					"response": []
 				}
 			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{access_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		},
+		{
+			"key": "access_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "refresh_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "azienda_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "software_id",
+			"value": "1",
+			"type": "string"
 		}
 	]
 }

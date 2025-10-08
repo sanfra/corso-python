@@ -41,10 +41,9 @@ INSTALLED_APPS = [
 
     # DRF
     'rest_framework',
-    'rest_framework.authtoken',  # ← AGGIUNGI QUESTO
-    'rest_framework_simplejwt',  # ← Aggiungi questo
-    
-    
+    'rest_framework.authtoken',  # disabile se usi solo JWT
+    'rest_framework_simplejwt',  # JSON Web Token (JWT)
+    'rest_framework_simplejwt.token_blacklist',
     'api',
 ]
 
@@ -167,8 +166,8 @@ from datetime import timedelta
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # Token valido per 60 minuti
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),     # Refresh valido per 7 giorni
-    'ROTATE_REFRESH_TOKENS': False,
-    'BLACKLIST_AFTER_ROTATION': False,
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
     'UPDATE_LAST_LOGIN': True,
     
     'ALGORITHM': 'HS256',

@@ -86,6 +86,17 @@ python manage.py sqlmigrate nome_app 0001
 
 Mostra il codice SQL che verrà eseguito per quella migrazione
 
+## Attivare autenticazione:
+
+### installare dipendenze
+
+pip install djangorestframework-simplejwt
+
+### creare super user
+
+python manage.py createsuperuser
+
+
 # Virtual Environment, Requirements e Django (Windows)
 
 ## 🎯 Progetto: PWW (Python Web Workshop)
