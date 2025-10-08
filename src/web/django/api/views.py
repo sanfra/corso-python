@@ -5,7 +5,7 @@ from rest_framework import status              # Codici HTTP (200, 404, 201, ecc
 from rest_framework import serializers         # Per convertire Model ↔ JSON
 from datetime import datetime
 
-from .models import Software  # Modello database
+from .models.software import Software  # Modello database
 
 
 # --- SERIALIZER ---

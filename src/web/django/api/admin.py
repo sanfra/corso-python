@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Software
+from .models.software import Software
 
 
 # @admin.register(): decorator per registrare il modello nell'admin Django
