@@ -1,13 +1,23 @@
 {
 	"info": {
-		"name": "Django Software API - Complete Collection",
-		"description": "Collection completa per testare tutte le API del progetto Django con Aziende e Software",
+		"name": "Django Software API - Complete Collection with JWT Auth",
+		"description": "Collection completa per testare tutte le API del progetto Django con Aziende e Software - Include autenticazione JWT",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"variable": [
 		{
 			"key": "base_url",
 			"value": "http://localhost:8000",
+			"type": "string"
+		},
+		{
+			"key": "access_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "refresh_token",
+			"value": "",
 			"type": "string"
 		},
 		{
@@ -21,9 +31,153 @@
 			"type": "string"
 		}
 	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{access_token}}",
+				"type": "string"
+			}
+		]
+	},
 	"item": [
 		{
-			"name": "0. Test Endpoints",
+				"name": "0. AUTENTICAZIONE JWT",
+				"item": [
+					{
+						"name": "Login (Ottieni JWT Token)",
+						"event": [
+							{
+								"listen": "test",
+								"script": {
+									"exec": [
+										"if (pm.response.code === 200) {",
+										"    var jsonData = pm.response.json();",
+										"    pm.collectionVariables.set(\"access_token\", jsonData.access);",
+										"    pm.collectionVariables.set(\"refresh_token\", jsonData.refresh);",
+										"    console.log(\"✅ Token JWT salvati con successo!\");",
+										"    console.log(\"Access Token: \" + jsonData.access.substring(0, 50) + \"...\");",
+										"    console.log(\"Refresh Token: \" + jsonData.refresh.substring(0, 50) + \"...\");",
+										"}"
+									],
+									"type": "text/javascript"
+								}
+							}
+						],
+						"request": {
+							"auth": {
+								"type": "noauth"
+							},
+							"method": "POST",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"body": {
+								"mode": "raw",
+								"raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}"
+							},
+							"url": {
+								"raw": "{{base_url}}/api/token/",
+								"host": [
+									"{{base_url}}"
+								],
+								"path": [
+									"api",
+									"token",
+									""
+								]
+							},
+							"description": "POST /api/token/ - Login e ottieni access e refresh token JWT.\n\nRisposta:\n{\n  \"access\": \"eyJ0eXAiOiJKV1QiLCJhbGc...\",\n  \"refresh\": \"eyJ0eXAiOiJKV1QiLCJhbGc...\"\n}"
+						}
+					},
+					{
+						"name": "Refresh Token",
+						"event": [
+							{
+								"listen": "test",
+								"script": {
+									"exec": [
+										"if (pm.response.code === 200) {",
+										"    var jsonData = pm.response.json();",
+										"    pm.collectionVariables.set(\"access_token\", jsonData.access);",
+										"    console.log(\"✅ Access token aggiornato!\");",
+										"    console.log(\"Nuovo Access Token: \" + jsonData.access.substring(0, 50) + \"...\");",
+										"}"
+									],
+									"type": "text/javascript"
+								}
+							}
+						],
+						"request": {
+							"auth": {
+								"type": "noauth"
+							},
+							"method": "POST",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"body": {
+								"mode": "raw",
+								"raw": "{\n  \"refresh\": \"{{refresh_token}}\"\n}"
+							},
+							"url": {
+								"raw": "{{base_url}}/api/token/refresh/",
+								"host": [
+									"{{base_url}}"
+								],
+								"path": [
+									"api",
+									"token",
+									"refresh",
+									""
+								]
+							},
+							"description": "POST /api/token/refresh/ - Rinnova l'access token quando scade usando il refresh token.\n\nUsare quando ricevi errore 401 per token scaduto."
+						}
+					},
+					{
+						"name": "Verifica Token",
+						"request": {
+							"auth": {
+								"type": "noauth"
+							},
+							"method": "POST",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"body": {
+								"mode": "raw",
+								"raw": "{\n  \"token\": \"{{access_token}}\"\n}"
+							},
+							"url": {
+								"raw": "{{base_url}}/api/token/verify/",
+								"host": [
+									"{{base_url}}"
+								],
+								"path": [
+									"api",
+									"token",
+									"verify",
+									""
+								]
+							},
+							"description": "POST /api/token/verify/ - Verifica se l'access token è ancora valido.\n\nRitorna 200 se valido, 401 se scaduto o invalido."
+						}
+					}
+				]
+			},
+		{
+			"name": "1. Test Endpoints",
 			"item": [
 				{
 					"name": "Hello World (GET)",
@@ -71,13 +225,19 @@
 			]
 		},
 		{
-			"name": "1. AZIENDE - CRUD",
+			"name": "2. AZIENDE - CRUD",
 			"item": [
 				{
 					"name": "Lista tutte le Aziende",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
 						"url": {
 							"raw": "{{base_url}}/api/aziende/",
 							"host": [
@@ -96,7 +256,13 @@
 					"name": "Dettaglio Azienda",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
 						"url": {
 							"raw": "{{base_url}}/api/aziende/{{azienda_id}}/",
 							"host": [
@@ -120,6 +286,11 @@
 							{
 								"key": "Content-Type",
 								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -149,6 +320,11 @@
 							{
 								"key": "Content-Type",
 								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -178,6 +354,11 @@
 							{
 								"key": "Content-Type",
 								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -207,6 +388,11 @@
 							{
 								"key": "Content-Type",
 								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -237,6 +423,11 @@
 							{
 								"key": "Content-Type",
 								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -263,7 +454,13 @@
 					"name": "Elimina Azienda (DELETE)",
 					"request": {
 						"method": "DELETE",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
 						"url": {
 							"raw": "{{base_url}}/api/aziende/{{azienda_id}}/delete/",
 							"host": [
@@ -283,13 +480,19 @@
 			]
 		},
 		{
-			"name": "2. SOFTWARE - CRUD",
+			"name": "3. SOFTWARE - CRUD",
 			"item": [
 				{
 					"name": "Lista tutti i Software",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
 						"url": {
 							"raw": "{{base_url}}/api/software/",
 							"host": [
@@ -308,7 +511,13 @@
 					"name": "Dettaglio Software",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
 						"url": {
 							"raw": "{{base_url}}/api/software/{{software_id}}/",
 							"host": [
@@ -332,6 +541,11 @@
 							{
 								"key": "Content-Type",
 								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -361,6 +575,11 @@
 							{
 								"key": "Content-Type",
 								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -390,6 +609,11 @@
 							{
 								"key": "Content-Type",
 								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -419,6 +643,11 @@
 							{
 								"key": "Content-Type",
 								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -448,6 +677,11 @@
 							{
 								"key": "Content-Type",
 								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -478,6 +712,11 @@
 							{
 								"key": "Content-Type",
 								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -504,7 +743,13 @@
 					"name": "Elimina Software (DELETE)",
 					"request": {
 						"method": "DELETE",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
 						"url": {
 							"raw": "{{base_url}}/api/software/{{software_id}}/delete/",
 							"host": [
@@ -524,13 +769,19 @@
 			]
 		},
 		{
-			"name": "3. RELAZIONI",
+			"name": "4. RELAZIONI",
 			"item": [
 				{
 					"name": "Software di un'Azienda",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
 						"url": {
 							"raw": "{{base_url}}/api/aziende/{{azienda_id}}/software/",
 							"host": [
@@ -551,7 +802,13 @@
 					"name": "Software di Adobe",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
 						"url": {
 							"raw": "{{base_url}}/api/aziende/1/software/",
 							"host": [
@@ -572,7 +829,13 @@
 					"name": "Software di Microsoft",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
 						"url": {
 							"raw": "{{base_url}}/api/aziende/2/software/",
 							"host": [
@@ -592,13 +855,19 @@
 			]
 		},
 		{
-			"name": "4. FILTRI E RICERCHE",
+			"name": "5. FILTRI E RICERCHE",
 			"item": [
 				{
 					"name": "Software Gratuiti",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
 						"url": {
 							"raw": "{{base_url}}/api/software/gratuiti/",
 							"host": [
@@ -618,7 +887,13 @@
 					"name": "Software a Pagamento",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
 						"url": {
 							"raw": "{{base_url}}/api/software/pagamento/",
 							"host": [
@@ -638,7 +913,13 @@
 					"name": "Cerca Software (per nome)",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
 						"url": {
 							"raw": "{{base_url}}/api/software/cerca/?q=photo",
 							"host": [
@@ -665,7 +946,13 @@
 					"name": "Cerca Software (Adobe)",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
 						"url": {
 							"raw": "{{base_url}}/api/software/cerca/?q=adobe",
 							"host": [
@@ -691,7 +978,13 @@
 					"name": "Filtra per Prezzo (0-100)",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
 						"url": {
 							"raw": "{{base_url}}/api/software/filtra/?min=0&max=100",
 							"host": [
@@ -723,7 +1016,13 @@
 					"name": "Filtra per Prezzo (100-250)",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
 						"url": {
 							"raw": "{{base_url}}/api/software/filtra/?min=100&max=250",
 							"host": [
@@ -752,13 +1051,19 @@
 			]
 		},
 		{
-			"name": "5. STATISTICHE",
+			"name": "6. STATISTICHE",
 			"item": [
 				{
 					"name": "Statistiche Generali",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
 						"url": {
 							"raw": "{{base_url}}/api/statistiche/",
 							"host": [
@@ -777,7 +1082,13 @@
 					"name": "Statistiche Azienda",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
 						"url": {
 							"raw": "{{base_url}}/api/aziende/{{azienda_id}}/statistiche/",
 							"host": [
@@ -798,7 +1109,13 @@
 					"name": "Statistiche Adobe",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
 						"url": {
 							"raw": "{{base_url}}/api/aziende/1/statistiche/",
 							"host": [

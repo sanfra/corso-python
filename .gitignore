@@ -209,3 +209,14 @@ yarn-error.log
 # - media/ (upload utenti)
 # - static/ (file statici raccolti)
 *.DS_Store
+docs/quiz/esame.md
+docs/quiz/esamen.html
+.gitignore
+docs/quiz/all.md
+docs/quiz/all.md
+.gitignore
+docs/quiz/.~lock.esamen.html#
+docs/quiz/esame riposste.md
+docs/quiz/all.md
+docs/quiz/all.md
+docs/quiz/all.md

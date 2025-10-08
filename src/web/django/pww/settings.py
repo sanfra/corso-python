@@ -29,7 +29,7 @@ ALLOWED_HOSTS = []
 
 
 # Application definition
-
+# pip install djangorestframework-simplejwt
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -37,7 +37,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+ 
+
+    # DRF
     'rest_framework',
+    'rest_framework.authtoken',  # ← AGGIUNGI QUESTO
+    'rest_framework_simplejwt',  # ← Aggiungi questo
+    
+    
     'api',
 ]
 
@@ -125,8 +132,51 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-# Django REST Framework settings
+
+# Configurazione REST Framework
+REST_FRAMEWORK_default = {
+    # Autenticazione di default
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',  # Token
+        'rest_framework.authentication.SessionAuthentication',  # Session (per browser)
+    ],
+    
+    # Permessi di default
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',  # ← Richiede autenticazione
+    ],
+}
+
+# Configurazione REST Framework
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [],
-    'DEFAULT_PERMISSION_CLASSES': [],
+    # Autenticazione di default
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',  # ← JWT
+        'rest_framework.authentication.SessionAuthentication',  # Session (per browser)
+    ],
+    
+    # Permessi di default
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+}
+
+# Configurazione JWT (opzionale - tempi personalizzati)
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # Token valido per 60 minuti
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),     # Refresh valido per 7 giorni
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': False,
+    'UPDATE_LAST_LOGIN': True,
+    
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    'VERIFYING_KEY': None,
+    
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
 }
