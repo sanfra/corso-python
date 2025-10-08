@@ -1,98 +1,86 @@
-from django.urls import path  # Funzione per definire pattern URL
-from . import views  # Importa le view dalla cartella corrente (api/)
+from django.urls import path
+from . import views
 
-# urlpatterns: lista degli URL dell'app
-# ⚠️ IMPORTANTE: Django controlla dall'ALTO verso il BASSO e si ferma al PRIMO match
+# urlpatterns: lista che contiene tutti i pattern URL dell'app
+# Django controlla questa lista dall'alto verso il basso per trovare la corrispondenza
 urlpatterns = [
-    # --- ENDPOINT DI TEST ---
-    
-    # GET /api/hello/
-    # path(URL_pattern, funzione_view, nome_simbolico)
+    # ============================================
+    # HELLO ENDPOINTS (TEST)
+    # ============================================
     path('hello/', views.hello_world, name='hello'),
-    
-    # POST /api/helloPost/
     path('helloPost/', views.hello_post, name='hello_post'),
     
     
-    # --- CRUD SOFTWARE ---
+    # ============================================
+    # AZIENDE - CRUD
+    # ============================================
     
-    # READ ALL: Ottieni lista completa
-    # GET /api/software/
+    # Lista e creazione
+    path('aziende/', views.lista_aziende, name='lista_aziende'),
+    path('aziende/create/', views.crea_azienda, name='crea_azienda'),
+    
+    # ⚠️ IMPORTANTE: URL specifici PRIMA di quelli con parametri dinamici
+    
+    # Dettaglio, update, delete (con ID dinamico)
+    path('aziende/<int:azienda_id>/', views.dettaglio_azienda, name='dettaglio_azienda'),
+    path('aziende/<int:azienda_id>/update/', views.aggiorna_azienda, name='aggiorna_azienda'),
+    path('aziende/<int:azienda_id>/patch/', views.aggiorna_parziale_azienda, name='aggiorna_parziale_azienda'),
+    path('aziende/<int:azienda_id>/delete/', views.elimina_azienda, name='elimina_azienda'),
+    
+    # Relazioni e statistiche
+    path('aziende/<int:azienda_id>/software/', views.software_per_azienda, name='software_per_azienda'),
+    path('aziende/<int:azienda_id>/statistiche/', views.statistiche_azienda, name='statistiche_azienda'),
+    
+    
+    # ============================================
+    # SOFTWARE - CRUD
+    # ============================================
+    
+    # Lista e creazione
     path('software/', views.lista_software, name='lista_software'),
-    
-    # CREATE: Crea nuovo record
-    # POST /api/software/create/
-    # Body JSON richiesto con tutti i campi del modello
     path('software/create/', views.crea_software, name='crea_software'),
     
-    
-    # --- FILTRI SPECIALI (URL FISSI) ---
-    # ⚠️ CRITICO: Questi DEVONO stare PRIMA degli URL con parametri dinamici!
-    # Motivo: se 'gratuiti' venisse dopo <int:software_id>, Django proverebbe
-    # a convertire "gratuiti" in un numero intero → Errore 404
-    
-    # GET /api/software/gratuiti/ - Solo software con gratuito=True
+    # ⚠️ FILTRI E RICERCHE - Devono stare PRIMA degli URL con <int:software_id>
     path('software/gratuiti/', views.software_gratuiti, name='software_gratuiti'),
+    path('software/pagamento/', views.software_a_pagamento, name='software_a_pagamento'),
+    path('software/cerca/', views.cerca_software, name='cerca_software'),
+    path('software/filtra/', views.filtra_per_prezzo, name='filtra_per_prezzo'),
     
-    # GET /api/software/produttore/Microsoft/
-    # <str:produttore>: cattura qualsiasi testo dall'URL e lo passa come parametro
-    # Esempio: "Adobe" viene passato a views.software_per_produttore(request, produttore="Adobe")
-    path('software/produttore/<str:produttore>/', 
-         views.software_per_produttore, 
-         name='software_per_produttore'),
+    # Dettaglio, update, delete (con ID dinamico)
+    # ⚠️ Questi vanno DOPO i filtri sopra!
+    path('software/<int:software_id>/', views.dettaglio_software, name='dettaglio_software'),
+    path('software/<int:software_id>/update/', views.aggiorna_software, name='aggiorna_software'),
+    path('software/<int:software_id>/patch/', views.aggiorna_parziale_software, name='aggiorna_parziale_software'),
+    path('software/<int:software_id>/delete/', views.elimina_software, name='elimina_software'),
     
     
-    # --- URL DINAMICI (CON PARAMETRI) ---
-    # ⚠️ REGOLA: Questi vanno ALLA FINE, dal più specifico al più generico
-    # Motivo: <int:software_id> cattura QUALSIASI numero, quindi è molto "generico"
-    
-    # READ ONE: Dettaglio di un singolo software
-    # GET /api/software/5/
-    # <int:software_id>: cattura SOLO numeri interi (es: 1, 42, 999)
-    # Django passa automaticamente software_id alla view come parametro
-    path('software/<int:software_id>/', 
-         views.dettaglio_software, 
-         name='dettaglio_software'),
-    
-    # UPDATE COMPLETO: Sostituisce tutti i campi (richiede TUTTI i campi nel body)
-    # PUT /api/software/5/update/
-    # Body JSON: deve contenere TUTTI i campi (nome, versione, produttore, ecc.)
-    path('software/<int:software_id>/update/', 
-         views.aggiorna_software, 
-         name='aggiorna_software'),
-    
-    # UPDATE PARZIALE: Modifica solo alcuni campi
-    # PATCH /api/software/5/patch/
-    # Body JSON: solo i campi da modificare (es: {"versione": "2.0"})
-    # Django REST Framework usa partial=True nel serializer
-    path('software/<int:software_id>/patch/', 
-         views.aggiorna_parziale_software, 
-         name='aggiorna_parziale_software'),
-    
-    # DELETE: Elimina record dal database (IRREVERSIBILE!)
-    # DELETE /api/software/5/delete/
-    # Nessun body richiesto, solo l'ID nell'URL
-    path('software/<int:software_id>/delete/', 
-         views.elimina_software, 
-         name='elimina_software'),
+    # ============================================
+    # STATISTICHE
+    # ============================================
+    path('statistiche/', views.statistiche_generali, name='statistiche_generali'),
 ]
 
 
-# --- NOTE IMPORTANTI ---
+# ============================================
+# NOTE IMPORTANTI
+# ============================================
 
-# 1. ORDINE URL: Sempre dal PIÙ SPECIFICO al PIÙ GENERICO
-#    ✅ Corretto: 'software/gratuiti/' PRIMA di 'software/<int:id>/'
-#    ❌ Sbagliato: 'software/<int:id>/' PRIMA di 'software/gratuiti/' → 404 error!
+# 1. ORDINE URL:
+#    ✅ URL fissi PRIMA (es: 'software/gratuiti/')
+#    ✅ URL dinamici DOPO (es: 'software/<int:id>/')
+#    Motivo: Django si ferma al primo match
 
-# 2. PARAMETRI URL:
-#    - <int:nome>: solo numeri interi (1, 42, 999)
-#    - <str:nome>: qualsiasi testo (Adobe, Microsoft, "hello world")
-#    - <slug:nome>: solo lettere, numeri, trattini, underscore
-#    - <path:nome>: qualsiasi cosa, anche con / (percorsi completi)
+# 2. PARAMETRI DINAMICI:
+#    <int:nome>    → cattura numero intero
+#    <str:nome>    → cattura stringa
+#    <slug:nome>   → cattura slug (lettere, numeri, -, _)
+#    <path:nome>   → cattura tutto, anche con /
 
-# 3. NAME: Utile per reverse() e {% url %} nei template
-#    Esempio: reverse('dettaglio_software', args=[5]) → '/api/software/5/'
+# 3. NAME:
+#    Usato per reverse URL: reverse('lista_software') → '/api/software/'
+#    Utile nei template e redirect
 
-# 4. TRAILING SLASH: Django preferisce URL con / finale
-#    - /api/software/ ✅ (con slash)
-#    - /api/software  ❌ (senza slash → redirect automatico a versione con /)
+# 4. TRAILING SLASH:
+#    Django preferisce URL con / finale
+#    /api/software/ ✅ (con slash)
+#    /api/software  → redirect automatico

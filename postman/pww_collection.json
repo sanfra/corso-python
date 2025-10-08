@@ -1,14 +1,29 @@
 {
 	"info": {
-		"_postman_id": "c2f306d4-2626-4fbb-afda-1ca75869235c",
-		"name": "PWW Django API - Software Collection",
-		"description": "Collection completa per testare tutte le API del progetto Django Software",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "42912126"
+		"name": "Django Software API - Complete Collection",
+		"description": "Collection completa per testare tutte le API del progetto Django con Aziende e Software",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		},
+		{
+			"key": "azienda_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "software_id",
+			"value": "1",
+			"type": "string"
+		}
+	],
 	"item": [
 		{
-			"name": "Hello Endpoints",
+			"name": "0. Test Endpoints",
 			"item": [
 				{
 					"name": "Hello World (GET)",
@@ -25,9 +40,9 @@
 								"hello",
 								""
 							]
-						}
-					},
-					"response": []
+						},
+						"description": "Endpoint di test base"
+					}
 				},
 				{
 					"name": "Hello POST",
@@ -49,17 +64,229 @@
 								"helloPost",
 								""
 							]
-						}
-					},
-					"response": []
+						},
+						"description": "Test endpoint POST"
+					}
 				}
 			]
 		},
 		{
-			"name": "Software CRUD",
+			"name": "1. AZIENDE - CRUD",
 			"item": [
 				{
-					"name": "Lista tutti i Software (GET)",
+					"name": "Lista tutte le Aziende",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/aziende/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"aziende",
+								""
+							]
+						},
+						"description": "GET /api/aziende/ - Restituisce tutte le aziende con conteggio software"
+					}
+				},
+				{
+					"name": "Dettaglio Azienda",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/aziende/{{azienda_id}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"aziende",
+								"{{azienda_id}}",
+								""
+							]
+						},
+						"description": "GET /api/aziende/<id>/ - Dettagli di una singola azienda"
+					}
+				},
+				{
+					"name": "Crea Azienda (Adobe)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Adobe Inc.\",\n  \"partita_iva\": \"12345678901\",\n  \"sede\": \"San Jose, California, USA\",\n  \"email\": \"info@adobe.com\",\n  \"telefono\": \"+1-408-536-6000\",\n  \"sito_web\": \"https://www.adobe.com\",\n  \"descrizione\": \"Leader mondiale nel software creativo e multimedia\",\n  \"data_fondazione\": \"1982-12-01\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/aziende/create/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"aziende",
+								"create",
+								""
+							]
+						},
+						"description": "POST /api/aziende/create/ - Crea Adobe"
+					}
+				},
+				{
+					"name": "Crea Azienda (Microsoft)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Microsoft Corporation\",\n  \"partita_iva\": \"98765432109\",\n  \"sede\": \"Redmond, Washington, USA\",\n  \"email\": \"info@microsoft.com\",\n  \"telefono\": \"+1-425-882-8080\",\n  \"sito_web\": \"https://www.microsoft.com\",\n  \"descrizione\": \"Tecnologia, software e servizi cloud\",\n  \"data_fondazione\": \"1975-04-04\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/aziende/create/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"aziende",
+								"create",
+								""
+							]
+						},
+						"description": "POST /api/aziende/create/ - Crea Microsoft"
+					}
+				},
+				{
+					"name": "Crea Azienda (JetBrains)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"JetBrains s.r.o.\",\n  \"partita_iva\": \"11122233344\",\n  \"sede\": \"Prague, Czech Republic\",\n  \"email\": \"info@jetbrains.com\",\n  \"telefono\": \"+420 241 722 501\",\n  \"sito_web\": \"https://www.jetbrains.com\",\n  \"descrizione\": \"IDE e strumenti di sviluppo professionali\",\n  \"data_fondazione\": \"2000-01-01\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/aziende/create/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"aziende",
+								"create",
+								""
+							]
+						},
+						"description": "POST /api/aziende/create/ - Crea JetBrains"
+					}
+				},
+				{
+					"name": "Aggiorna Azienda (PUT)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Adobe Inc.\",\n  \"partita_iva\": \"12345678901\",\n  \"sede\": \"San Jose, California, USA - New Building\",\n  \"email\": \"contact@adobe.com\",\n  \"telefono\": \"+1-408-536-6000\",\n  \"sito_web\": \"https://www.adobe.com\",\n  \"descrizione\": \"Leader mondiale nel software creativo - AGGIORNATO\",\n  \"data_fondazione\": \"1982-12-01\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/aziende/{{azienda_id}}/update/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"aziende",
+								"{{azienda_id}}",
+								"update",
+								""
+							]
+						},
+						"description": "PUT /api/aziende/<id>/update/ - Aggiorna tutti i campi"
+					}
+				},
+				{
+					"name": "Aggiorna Azienda Parziale (PATCH)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"nuovo@adobe.com\",\n  \"telefono\": \"+1-408-999-9999\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/aziende/{{azienda_id}}/patch/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"aziende",
+								"{{azienda_id}}",
+								"patch",
+								""
+							]
+						},
+						"description": "PATCH /api/aziende/<id>/patch/ - Aggiorna solo alcuni campi"
+					}
+				},
+				{
+					"name": "Elimina Azienda (DELETE)",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/aziende/{{azienda_id}}/delete/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"aziende",
+								"{{azienda_id}}",
+								"delete",
+								""
+							]
+						},
+						"description": "DELETE /api/aziende/<id>/delete/ - Elimina azienda e tutti i suoi software (CASCADE)"
+					}
+				}
+			]
+		},
+		{
+			"name": "2. SOFTWARE - CRUD",
+			"item": [
+				{
+					"name": "Lista tutti i Software",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -73,12 +300,12 @@
 								"software",
 								""
 							]
-						}
-					},
-					"response": []
+						},
+						"description": "GET /api/software/ - Lista tutti i software con info azienda"
+					}
 				},
 				{
-					"name": "Dettaglio Software (GET)",
+					"name": "Dettaglio Software",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -93,12 +320,12 @@
 								"{{software_id}}",
 								""
 							]
-						}
-					},
-					"response": []
+						},
+						"description": "GET /api/software/<id>/ - Dettagli di un singolo software"
+					}
 				},
 				{
-					"name": "Crea Software (POST)",
+					"name": "Crea Software (Photoshop - Adobe)",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -109,7 +336,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"nome\": \"Photoshop\",\n  \"versione\": \"25.0\",\n  \"produttore\": \"Adobe\",\n  \"prezzo\": \"239.88\",\n  \"gratuito\": false,\n  \"data_rilascio\": \"2024-10-01\"\n}"
+							"raw": "{\n  \"nome\": \"Photoshop\",\n  \"versione\": \"25.0\",\n  \"azienda\": 1,\n  \"prezzo\": \"239.88\",\n  \"gratuito\": false,\n  \"attivo\": true,\n  \"data_rilascio\": \"2024-10-01\",\n  \"descrizione\": \"Software professionale per editing e manipolazione di immagini\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/software/create/",
@@ -122,12 +349,12 @@
 								"create",
 								""
 							]
-						}
-					},
-					"response": []
+						},
+						"description": "POST /api/software/create/ - Crea Photoshop per Adobe (azienda_id=1)"
+					}
 				},
 				{
-					"name": "Crea Software MS Free",
+					"name": "Crea Software (Illustrator - Adobe)",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -138,7 +365,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"nome\": \"DBEaver\",\n  \"versione\": \"10.0\",\n  \"produttore\": \"JetBrain\",\n  \"prezzo\": \"00\",\n  \"gratuito\": true,\n  \"data_rilascio\": \"2023-10-01\"\n}"
+							"raw": "{\n  \"nome\": \"Illustrator\",\n  \"versione\": \"28.0\",\n  \"azienda\": 1,\n  \"prezzo\": \"199.99\",\n  \"gratuito\": false,\n  \"attivo\": true,\n  \"data_rilascio\": \"2024-09-15\",\n  \"descrizione\": \"Software di grafica vettoriale professionale\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/software/create/",
@@ -151,12 +378,12 @@
 								"create",
 								""
 							]
-						}
-					},
-					"response": []
+						},
+						"description": "POST /api/software/create/ - Crea Illustrator per Adobe"
+					}
 				},
 				{
-					"name": "Crea Software MS (POST) Copy",
+					"name": "Crea Software (VS Code - Microsoft)",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -167,7 +394,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"nome\": \"Photoshop\",\n  \"versione\": \"25.0\",\n  \"produttore\": \"Adobe\",\n  \"prezzo\": \"239.88\",\n  \"gratuito\": false,\n  \"data_rilascio\": \"2024-10-01\"\n}"
+							"raw": "{\n  \"nome\": \"Visual Studio Code\",\n  \"versione\": \"1.85\",\n  \"azienda\": 2,\n  \"prezzo\": \"0.00\",\n  \"gratuito\": true,\n  \"attivo\": true,\n  \"data_rilascio\": \"2024-01-01\",\n  \"descrizione\": \"Editor di codice open source, potente e leggero\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/software/create/",
@@ -180,12 +407,41 @@
 								"create",
 								""
 							]
-						}
-					},
-					"response": []
+						},
+						"description": "POST /api/software/create/ - Crea VS Code per Microsoft (azienda_id=2)"
+					}
 				},
 				{
-					"name": "Aggiorna Software Completo (PUT)",
+					"name": "Crea Software (IntelliJ IDEA - JetBrains)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"IntelliJ IDEA\",\n  \"versione\": \"2024.1\",\n  \"azienda\": 3,\n  \"prezzo\": \"149.00\",\n  \"gratuito\": false,\n  \"attivo\": true,\n  \"data_rilascio\": \"2024-03-15\",\n  \"descrizione\": \"IDE Java professionale\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/software/create/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"software",
+								"create",
+								""
+							]
+						},
+						"description": "POST /api/software/create/ - Crea IntelliJ per JetBrains (azienda_id=3)"
+					}
+				},
+				{
+					"name": "Aggiorna Software (PUT)",
 					"request": {
 						"method": "PUT",
 						"header": [
@@ -196,7 +452,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"nome\": \"VS Code\",\n  \"versione\": \"1.86\",\n  \"produttore\": \"Microsoft\",\n  \"prezzo\": \"0.00\",\n  \"gratuito\": true,\n  \"data_rilascio\": \"2024-01-15\"\n}"
+							"raw": "{\n  \"nome\": \"Photoshop\",\n  \"versione\": \"25.1\",\n  \"azienda\": 1,\n  \"prezzo\": \"249.99\",\n  \"gratuito\": false,\n  \"attivo\": true,\n  \"data_rilascio\": \"2024-10-15\",\n  \"descrizione\": \"Software professionale per editing - VERSIONE AGGIORNATA\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/software/{{software_id}}/update/",
@@ -210,9 +466,9 @@
 								"update",
 								""
 							]
-						}
-					},
-					"response": []
+						},
+						"description": "PUT /api/software/<id>/update/ - Aggiorna tutti i campi"
+					}
 				},
 				{
 					"name": "Aggiorna Software Parziale (PATCH)",
@@ -226,7 +482,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"versione\": \"1.87\",\n  \"prezzo\": \"0.00\"\n}"
+							"raw": "{\n  \"versione\": \"25.2\",\n  \"prezzo\": \"229.99\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/software/{{software_id}}/patch/",
@@ -240,9 +496,9 @@
 								"patch",
 								""
 							]
-						}
-					},
-					"response": []
+						},
+						"description": "PATCH /api/software/<id>/patch/ - Aggiorna solo alcuni campi"
+					}
 				},
 				{
 					"name": "Elimina Software (DELETE)",
@@ -261,17 +517,85 @@
 								"delete",
 								""
 							]
-						}
-					},
-					"response": []
+						},
+						"description": "DELETE /api/software/<id>/delete/ - Elimina software"
+					}
 				}
 			]
 		},
 		{
-			"name": "Software Filtri",
+			"name": "3. RELAZIONI",
 			"item": [
 				{
-					"name": "Software Gratuiti (GET)",
+					"name": "Software di un'Azienda",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/aziende/{{azienda_id}}/software/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"aziende",
+								"{{azienda_id}}",
+								"software",
+								""
+							]
+						},
+						"description": "GET /api/aziende/<id>/software/ - Tutti i software di una specifica azienda"
+					}
+				},
+				{
+					"name": "Software di Adobe",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/aziende/1/software/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"aziende",
+								"1",
+								"software",
+								""
+							]
+						},
+						"description": "GET /api/aziende/1/software/ - Software prodotti da Adobe"
+					}
+				},
+				{
+					"name": "Software di Microsoft",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/aziende/2/software/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"aziende",
+								"2",
+								"software",
+								""
+							]
+						},
+						"description": "GET /api/aziende/2/software/ - Software prodotti da Microsoft"
+					}
+				}
+			]
+		},
+		{
+			"name": "4. FILTRI E RICERCHE",
+			"item": [
+				{
+					"name": "Software Gratuiti",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -286,44 +610,212 @@
 								"gratuiti",
 								""
 							]
-						}
-					},
-					"response": []
+						},
+						"description": "GET /api/software/gratuiti/ - Solo software con gratuito=true"
+					}
 				},
 				{
-					"name": "Software per Produttore (GET)",
+					"name": "Software a Pagamento",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/api/software/produttore/Microsoft/",
+							"raw": "{{base_url}}/api/software/pagamento/",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
 								"software",
-								"produttore",
-								"Microsoft",
+								"pagamento",
 								""
 							]
-						}
-					},
-					"response": []
+						},
+						"description": "GET /api/software/pagamento/ - Solo software con gratuito=false"
+					}
+				},
+				{
+					"name": "Cerca Software (per nome)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/software/cerca/?q=photo",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"software",
+								"cerca",
+								""
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "photo",
+									"description": "Termine di ricerca"
+								}
+							]
+						},
+						"description": "GET /api/software/cerca/?q=photo - Cerca 'photo' in nome software o nome azienda"
+					}
+				},
+				{
+					"name": "Cerca Software (Adobe)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/software/cerca/?q=adobe",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"software",
+								"cerca",
+								""
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "adobe"
+								}
+							]
+						},
+						"description": "GET /api/software/cerca/?q=adobe - Cerca software di Adobe"
+					}
+				},
+				{
+					"name": "Filtra per Prezzo (0-100)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/software/filtra/?min=0&max=100",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"software",
+								"filtra",
+								""
+							],
+							"query": [
+								{
+									"key": "min",
+									"value": "0",
+									"description": "Prezzo minimo"
+								},
+								{
+									"key": "max",
+									"value": "100",
+									"description": "Prezzo massimo"
+								}
+							]
+						},
+						"description": "GET /api/software/filtra/?min=0&max=100 - Software con prezzo tra €0 e €100"
+					}
+				},
+				{
+					"name": "Filtra per Prezzo (100-250)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/software/filtra/?min=100&max=250",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"software",
+								"filtra",
+								""
+							],
+							"query": [
+								{
+									"key": "min",
+									"value": "100"
+								},
+								{
+									"key": "max",
+									"value": "250"
+								}
+							]
+						},
+						"description": "GET /api/software/filtra/?min=100&max=250 - Software con prezzo tra €100 e €250"
+					}
 				}
 			]
-		}
-	],
-	"variable": [
-		{
-			"key": "base_url",
-			"value": "http://localhost:8000",
-			"type": "string"
 		},
 		{
-			"key": "software_id",
-			"value": "1",
-			"type": "string"
+			"name": "5. STATISTICHE",
+			"item": [
+				{
+					"name": "Statistiche Generali",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/statistiche/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"statistiche",
+								""
+							]
+						},
+						"description": "GET /api/statistiche/ - Statistiche generali su aziende e software"
+					}
+				},
+				{
+					"name": "Statistiche Azienda",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/aziende/{{azienda_id}}/statistiche/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"aziende",
+								"{{azienda_id}}",
+								"statistiche",
+								""
+							]
+						},
+						"description": "GET /api/aziende/<id>/statistiche/ - Statistiche dettagliate per una specifica azienda"
+					}
+				},
+				{
+					"name": "Statistiche Adobe",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/aziende/1/statistiche/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"aziende",
+								"1",
+								"statistiche",
+								""
+							]
+						},
+						"description": "GET /api/aziende/1/statistiche/ - Statistiche software Adobe"
+					}
+				}
+			]
 		}
 	]
 }
