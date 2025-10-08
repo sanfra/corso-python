@@ -47,6 +47,10 @@ def print_warning(message):
     print(f"{Colors.WARNING}⚠ {message}{Colors.ENDC}")
 
 
+def print_skip(message):
+    print(f"{Colors.WARNING}⊘ {message} (già esistente, skippato){Colors.ENDC}")
+
+
 def get_python_command():
     """Determina il comando Python corretto"""
     if platform.system() == "Windows":
@@ -86,7 +90,7 @@ def create_requirements():
     print_step("File requirements.txt")
     
     if Path("requirements.txt").exists():
-        print_success("requirements.txt già esistente")
+        print_skip("requirements.txt")
         return True
     
     with open("requirements.txt", "w") as f:
@@ -101,7 +105,7 @@ def create_venv():
     print_step("Virtual environment")
     
     if Path("venv_pww").exists():
-        print_success("venv_pww già esistente")
+        print_skip("venv_pww")
         return True
     
     python_cmd = get_python_command()
@@ -151,25 +155,32 @@ def install_requirements():
         return False
 
 
+def find_project_folder():
+    """Trova la cartella del progetto Django"""
+    # Cerca la cartella che contiene settings.py
+    for item in Path(".").iterdir():
+        if item.is_dir() and (item / "settings.py").exists():
+            return item.name
+    return None
+
+
 def create_django_project():
     """Crea progetto Django"""
     print_step("Progetto Django")
     
     if Path("manage.py").exists():
-        print_success("Progetto già esistente")
-        # Verifica che la cartella del progetto esista
         project_folder = find_project_folder()
         if project_folder:
-            print_success(f"Trovata cartella progetto: {project_folder}")
+            print_skip(f"Progetto Django (cartella: {project_folder})")
             return True
         else:
             print_warning("manage.py esiste ma cartella progetto non trovata")
-            print_warning("Ricreo il progetto...")
+            print_warning("Impossibile procedere senza sovrascrivere")
+            return False
     
     django_admin_cmd = get_django_admin()
     
     try:
-        # Crea il progetto nella cartella corrente
         subprocess.run([django_admin_cmd, "startproject", "pww", "."], check=True, capture_output=True)
         print_success("Progetto 'pww' creato")
         return True
@@ -185,16 +196,14 @@ def create_api_app():
     """Crea app API"""
     print_step("App API")
     
-    if Path("api").exists():
-        print_success("App API già esistente")
-        # Verifica che i file base esistano
-        if (Path("api") / "__init__.py").exists():
-            return True
-        else:
-            print_warning("Cartella api/ esiste ma è incompleta")
-            print_warning("Ricreo l'app...")
-            import shutil
-            shutil.rmtree(Path("api"))
+    if Path("api").exists() and (Path("api") / "__init__.py").exists():
+        print_skip("App API")
+        return True
+    
+    if Path("api").exists() and not (Path("api") / "__init__.py").exists():
+        print_warning("Cartella api/ esiste ma sembra incompleta")
+        print_warning("Impossibile procedere senza sovrascrivere")
+        return False
     
     python_cmd = get_venv_python()
     
@@ -214,8 +223,22 @@ def configure_api():
     """Configura views e URLs dell'API"""
     print_step("Configurazione API")
     
-    # Views con GET e POST
-    views_content = """from rest_framework.decorators import api_view
+    views_path = Path("api") / "views.py"
+    urls_path = Path("api") / "urls.py"
+    
+    # Verifica views.py
+    if views_path.exists():
+        with open(views_path, "r") as f:
+            content = f.read()
+        # Controlla se contiene già le nostre view
+        if "hello_world" in content or len(content) > 200:
+            print_skip("api/views.py")
+        else:
+            # File views.py di default Django (quasi vuoto)
+            print_warning("views.py esiste ma sembra vuoto, lo skippo comunque")
+    else:
+        # Crea views.py solo se non esiste
+        views_content = """from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from datetime import datetime
@@ -241,11 +264,16 @@ def hello_post(request):
     }
     return Response(data, status=status.HTTP_200_OK)
 """
-    with open(Path("api") / "views.py", "w") as f:
-        f.write(views_content)
+        with open(views_path, "w") as f:
+            f.write(views_content)
+        print_success("api/views.py creato")
     
-    # URLs con entrambi gli endpoint
-    urls_content = """from django.urls import path
+    # Verifica urls.py
+    if urls_path.exists():
+        print_skip("api/urls.py")
+    else:
+        # Crea urls.py solo se non esiste
+        urls_content = """from django.urls import path
 from . import views
 
 urlpatterns = [
@@ -253,27 +281,17 @@ urlpatterns = [
     path('helloPost/', views.hello_post, name='hello_post'),
 ]
 """
-    with open(Path("api") / "urls.py", "w") as f:
-        f.write(urls_content)
+        with open(urls_path, "w") as f:
+            f.write(urls_content)
+        print_success("api/urls.py creato")
     
-    print_success("API configurata (GET /api/hello/, POST /api/helloPost/)")
     return True
 
 
-def find_project_folder():
-    """Trova la cartella del progetto Django"""
-    # Cerca la cartella che contiene settings.py
-    for item in Path(".").iterdir():
-        if item.is_dir() and (item / "settings.py").exists():
-            return item.name
-    return None
-
-
 def update_settings():
-    """Aggiorna settings.py"""
-    print_step("Aggiornamento settings")
+    """Aggiorna settings.py solo se necessario"""
+    print_step("Verifica settings")
     
-    # Trova la cartella del progetto
     project_folder = find_project_folder()
     if not project_folder:
         print_error("Cartella progetto non trovata")
@@ -284,15 +302,20 @@ def update_settings():
     with open(settings_path, "r") as f:
         content = f.read()
     
-    # Aggiungi apps se non presenti
+    modified = False
+    
+    # Aggiungi apps solo se non presenti
     if "'rest_framework'" not in content:
         content = content.replace(
             "'django.contrib.staticfiles',",
             "'django.contrib.staticfiles',\n    'rest_framework',\n    'api',"
         )
+        modified = True
         print_success("Apps aggiunte a INSTALLED_APPS")
+    else:
+        print_skip("INSTALLED_APPS (già configurato)")
     
-    # Disabilita CSRF per API (solo per sviluppo)
+    # Aggiungi config DRF solo se non presente
     if "REST_FRAMEWORK" not in content:
         content += """\n
 # Django REST Framework settings
@@ -301,19 +324,23 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [],
 }
 """
+        modified = True
         print_success("Configurazione DRF aggiunta")
+    else:
+        print_skip("REST_FRAMEWORK (già configurato)")
     
-    with open(settings_path, "w") as f:
-        f.write(content)
+    # Scrivi solo se modificato
+    if modified:
+        with open(settings_path, "w") as f:
+            f.write(content)
     
     return True
 
 
 def update_urls():
-    """Aggiorna urls.py principale"""
-    print_step("Aggiornamento URLs")
+    """Aggiorna urls.py principale solo se necessario"""
+    print_step("Verifica URLs")
     
-    # Trova la cartella del progetto
     project_folder = find_project_folder()
     if not project_folder:
         print_error("Cartella progetto non trovata")
@@ -321,6 +348,16 @@ def update_urls():
     
     urls_path = Path(project_folder) / "urls.py"
     
+    # Leggi il file esistente
+    with open(urls_path, "r") as f:
+        content = f.read()
+    
+    # Controlla se api/ è già configurato
+    if "path('api/', include('api.urls'))" in content or "include('api.urls')" in content:
+        print_skip("URLs principali (api/ già configurato)")
+        return True
+    
+    # Se non è configurato, sovrascrivi (questa è l'unica eccezione)
     urls_content = """from django.contrib import admin
 from django.urls import path, include
 
@@ -333,7 +370,7 @@ urlpatterns = [
     with open(urls_path, "w") as f:
         f.write(urls_content)
     
-    print_success("URLs configurati")
+    print_success("URLs configurati (path api/ aggiunto)")
     return True
 
 
@@ -397,7 +434,7 @@ def main():
     if not create_api_app():
         sys.exit(1)
     
-    # Configura API
+    # Configura API (skippa file esistenti)
     configure_api()
     update_settings()
     update_urls()
@@ -409,7 +446,11 @@ def main():
     print(f"\n{Colors.OKGREEN}{Colors.BOLD}✓ Setup completato!{Colors.ENDC}\n")
     print("Struttura:")
     print("  📁 venv_pww/  - Virtual environment")
-    print("  📁 pww/       - Progetto Django")
+    
+    project_folder = find_project_folder()
+    if project_folder:
+        print(f"  📁 {project_folder}/       - Progetto Django")
+    
     print("  📁 api/       - App API")
     print("  📄 manage.py")
     print("  📄 db.sqlite3")

@@ -18,7 +18,7 @@ bash
 
 ```bash
 # 1. Attiva l'ambiente virtuale
- pww_venv\Scripts\activate
+ venv_pww\Scripts\activate
 
 # 2. Avvia il server Django
 python manage.py runserver
