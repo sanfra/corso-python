@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Django REST API Flow - Da Postman al Database</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { margin: 0; padding: 0; overflow: hidden; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <script type="text/babel">
+        const { useState } = React;
+
+        const ChevronRight = ({ size = 24, className = "" }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+        );
+
+        const ChevronLeft = ({ size = 24, className = "" }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+        );
+
+        const CheckCircle = ({ size = 24, className = "" }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+        );
+
+        const Database = ({ size = 24, className = "" }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+                <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+            </svg>
+        );
+
+        const Server = ({ size = 24, className = "" }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+                <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+                <line x1="6" y1="6" x2="6.01" y2="6"></line>
+                <line x1="6" y1="18" x2="6.01" y2="18"></line>
+            </svg>
+        );
+
+        const FileCode = ({ size = 24, className = "" }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+        );
+
+        const Boxes = ({ size = 24, className = "" }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+            </svg>
+        );
+
+        function DjangoFlowPresentation() {
+            const [currentSlide, setCurrentSlide] = useState(0);
+
+            const slides = [
+                {
+                    title: "Django REST API Flow",
+                    subtitle: "Da Postman al Database",
+                    content: (
+                        <div className="flex flex-col items-center justify-center h-full space-y-8">
+                            <div className="text-6xl">🔄</div>
+                            <h1 className="text-5xl font-bold text-blue-600">Django REST API</h1>
+                            <p className="text-2xl text-gray-600">Viaggio di una richiesta HTTP</p>
+                            <p className="text-lg text-gray-500">Da Postman al Database e ritorno</p>
+                        </div>
+                    )
+                },
+                {
+                    title: "Step 1: Client Request",
+                    subtitle: "Postman invia la richiesta HTTP",
+                    content: (
+                        <div className="space-y-6">
+                            <div className="bg-orange-50 p-6 rounded-lg border-2 border-orange-300">
+                                <div className="flex items-center space-x-4 mb-4">
+                                    <div className="text-4xl">📮</div>
+                                    <h3 className="text-2xl font-bold text-orange-700">Postman</h3>
+                                </div>
+                                <div className="bg-white p-4 rounded font-mono text-sm">
+                                    <div className="text-green-600 font-bold mb-2">POST http://localhost:8000/api/software/create/</div>
+                                    <div className="text-gray-700">Headers:</div>
+                                    <div className="ml-4 text-gray-600">Content-Type: application/json</div>
+                                    <div className="text-gray-700 mt-2">Body (JSON):</div>
+                                    <pre className="ml-4 text-gray-600 mt-1">{`{
+  "nome": "Photoshop",
+  "versione": "25.0",
+  "produttore": "Adobe",
+  "prezzo": "239.88",
+  "gratuito": false,
+  "data_rilascio": "2024-10-01"
+}`}</pre>
+                                </div>
+                            </div>
+                            <div className="flex justify-center">
+                                <ChevronRight className="text-blue-500" size={48} />
+                            </div>
+                        </div>
+                    )
+                },
+                {
+                    title: "Step 2: Django URL Resolver",
+                    subtitle: "urls.py - Routing della richiesta",
+                    content: (
+                        <div className="space-y-6">
+                            <div className="bg-blue-50 p-6 rounded-lg border-2 border-blue-300">
+                                <div className="flex items-center space-x-4 mb-4">
+                                    <Server className="text-blue-600" size={40} />
+                                    <h3 className="text-2xl font-bold text-blue-700">URL Dispatcher</h3>
+                                </div>
+                                <div className="space-y-4">
+                                    <div className="bg-white p-4 rounded">
+                                        <div className="font-bold text-gray-700 mb-2">1. Root urls.py (progetto principale)</div>
+                                        <pre className="text-sm font-mono text-gray-600">{`urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('api/', include('api.urls')),  ← Match!
+]`}</pre>
+                                    </div>
+                                    <div className="flex justify-center">
+                                        <ChevronRight className="text-blue-400" size={32} />
+                                    </div>
+                                    <div className="bg-white p-4 rounded">
+                                        <div className="font-bold text-gray-700 mb-2">2. api/urls.py (app specifica)</div>
+                                        <pre className="text-sm font-mono text-gray-600">{`urlpatterns = [
+    path('software/create/', 
+         views.crea_software,    ← Match!
+         name='crea_software'),
+]`}</pre>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="bg-yellow-50 p-3 rounded border border-yellow-300">
+                                <div className="flex items-start space-x-2">
+                                    <span className="text-xl">💡</span>
+                                    <div className="text-sm">
+                                        <strong>Django cerca dall'alto al basso</strong> e si ferma al primo match.
+                                        <br/>URL trovato → passa alla View corrispondente
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                },
+                {
+                    title: "Step 3: Middleware Chain",
+                    subtitle: "Elaborazione pre-view",
+                    content: (
+                        <div className="space-y-6">
+                            <div className="bg-purple-50 p-6 rounded-lg border-2 border-purple-300">
+                                <div className="flex items-center space-x-4 mb-4">
+                                    <Boxes className="text-purple-600" size={40} />
+                                    <h3 className="text-2xl font-bold text-purple-700">Middleware</h3>
+                                </div>
+                                <div className="space-y-3">
+                                    <div className="bg-white p-3 rounded border-l-4 border-purple-400">
+                                        <div className="font-semibold">1. SecurityMiddleware</div>
+                                        <div className="text-sm text-gray-600">Gestisce HTTPS, headers di sicurezza</div>
+                                    </div>
+                                    <div className="bg-white p-3 rounded border-l-4 border-purple-400">
+                                        <div className="font-semibold">2. SessionMiddleware</div>
+                                        <div className="text-sm text-gray-600">Gestisce sessioni utente</div>
+                                    </div>
+                                    <div className="bg-white p-3 rounded border-l-4 border-purple-400">
+                                        <div className="font-semibold">3. AuthenticationMiddleware</div>
+                                        <div className="text-sm text-gray-600">Identifica l'utente dalla richiesta</div>
+                                    </div>
+                                    <div className="bg-white p-3 rounded border-l-4 border-purple-400">
+                                        <div className="font-semibold">4. CsrfViewMiddleware</div>
+                                        <div className="text-sm text-gray-600">Protezione CSRF (saltato in DRF API)</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="bg-green-50 p-3 rounded border border-green-300">
+                                <div className="flex items-center space-x-2">
+                                    <CheckCircle className="text-green-600" size={20} />
+                                    <span className="text-sm font-semibold">Request processata → Passa alla View</span>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                },
+                {
+                    title: "Step 4: View Function",
+                    subtitle: "views.py - Business Logic",
+                    content: (
+                        <div className="space-y-6">
+                            <div className="bg-green-50 p-6 rounded-lg border-2 border-green-300">
+                                <div className="flex items-center space-x-4 mb-4">
+                                    <FileCode className="text-green-600" size={40} />
+                                    <h3 className="text-2xl font-bold text-green-700">View: crea_software</h3>
+                                </div>
+                                <div className="bg-white p-4 rounded font-mono text-xs">
+                                    <pre className="text-gray-700">{`@api_view(['POST'])
+def crea_software(request):
+    # 1. Riceve request.data (già parsato da DRF)
+    
+    # 2. Crea Serializer con i dati
+    serializer = SoftwareSerializer(data=request.data)
+    
+    # 3. Valida i dati
+    if serializer.is_valid(raise_exception=True):
+        # 4. Salva nel database
+        serializer.save()
+        
+        # 5. Restituisce risposta
+        return Response(
+            serializer.data, 
+            status=status.HTTP_201_CREATED
+        )
+`}</pre>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-3 gap-3 text-center">
+                                <div className="bg-blue-100 p-3 rounded">
+                                    <div className="font-bold text-sm">Input</div>
+                                    <div className="text-xs">request.data</div>
+                                </div>
+                                <div className="bg-yellow-100 p-3 rounded">
+                                    <div className="font-bold text-sm">Processo</div>
+                                    <div className="text-xs">Serializer</div>
+                                </div>
+                                <div className="bg-green-100 p-3 rounded">
+                                    <div className="font-bold text-sm">Output</div>
+                                    <div className="text-xs">Response</div>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                },
+                {
+                    title: "Step 5: Serializer",
+                    subtitle: "Validazione e conversione dati",
+                    content: (
+                        <div className="space-y-6">
+                            <div className="bg-indigo-50 p-6 rounded-lg border-2 border-indigo-300">
+                                <div className="flex items-center space-x-4 mb-4">
+                                    <div className="text-4xl">🔄</div>
+                                    <h3 className="text-2xl font-bold text-indigo-700">SoftwareSerializer</h3>
+                                </div>
+                                <div className="space-y-4">
+                                    <div className="bg-white p-4 rounded">
+                                        <div className="font-bold mb-2">1. Ricezione dati (JSON → Python dict)</div>
+                                        <pre className="text-xs font-mono text-gray-600">{`data = {
+  "nome": "Photoshop",
+  "versione": "25.0",
+  "produttore": "Adobe",
+  "prezzo": "239.88",
+  "gratuito": false,
+  "data_rilascio": "2024-10-01"
+}`}</pre>
+                                    </div>
+                                    <div className="bg-white p-4 rounded">
+                                        <div className="font-bold mb-2">2. Validazione</div>
+                                        <ul className="text-sm space-y-1 text-gray-700">
+                                            <li>✓ Campi obbligatori presenti?</li>
+                                            <li>✓ Tipi corretti? (str, decimal, bool, date)</li>
+                                            <li>✓ max_length rispettato?</li>
+                                            <li>✓ Validatori custom?</li>
+                                        </ul>
+                                    </div>
+                                    <div className="bg-white p-4 rounded">
+                                        <div className="font-bold mb-2">3. Conversione tipi</div>
+                                        <div className="text-xs font-mono text-gray-600">
+                                            "239.88" → Decimal("239.88")<br/>
+                                            "2024-10-01" → date(2024, 10, 1)<br/>
+                                            false → False (Python bool)
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                },
+                {
+                    title: "Step 6: Django ORM",
+                    subtitle: "Model e Query al Database",
+                    content: (
+                        <div className="space-y-6">
+                            <div className="bg-cyan-50 p-6 rounded-lg border-2 border-cyan-300">
+                                <div className="flex items-center space-x-4 mb-4">
+                                    <Database className="text-cyan-600" size={40} />
+                                    <h3 className="text-2xl font-bold text-cyan-700">Django ORM</h3>
+                                </div>
+                                <div className="space-y-4">
+                                    <div className="bg-white p-4 rounded">
+                                        <div className="font-bold mb-2">1. serializer.save() chiama:</div>
+                                        <pre className="text-xs font-mono text-gray-600">{`Software.objects.create(
+    nome="Photoshop",
+    versione="25.0",
+    produttore="Adobe",
+    prezzo=Decimal("239.88"),
+    gratuito=False,
+    data_rilascio=date(2024, 10, 1)
+)`}</pre>
+                                    </div>
+                                    <div className="bg-white p-4 rounded">
+                                        <div className="font-bold mb-2">2. ORM genera SQL:</div>
+                                        <pre className="text-xs font-mono text-gray-600">{`INSERT INTO api_software 
+    (nome, versione, produttore, prezzo, 
+     gratuito, data_rilascio)
+VALUES 
+    ('Photoshop', '25.0', 'Adobe', 239.88,
+     0, '2024-10-01');`}</pre>
+                                    </div>
+                                    <div className="bg-white p-4 rounded">
+                                        <div className="font-bold mb-2">3. Database esegue la query</div>
+                                        <div className="text-sm text-gray-600">
+                                            SQLite (o PostgreSQL/MySQL) salva il record
+                                            <br/>
+                                            Genera ID automatico (es: id=2)
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                },
+                {
+                    title: "Step 7: Database",
+                    subtitle: "Persistenza dei dati",
+                    content: (
+                        <div className="space-y-6">
+                            <div className="bg-slate-50 p-6 rounded-lg border-2 border-slate-300">
+                                <div className="flex items-center space-x-4 mb-4">
+                                    <Database className="text-slate-600" size={40} />
+                                    <h3 className="text-2xl font-bold text-slate-700">SQLite Database</h3>
+                                </div>
+                                <div className="bg-white p-4 rounded overflow-x-auto">
+                                    <table className="w-full text-xs">
+                                        <thead className="bg-slate-200">
+                                            <tr>
+                                                <th className="p-2 text-left">id</th>
+                                                <th className="p-2 text-left">nome</th>
+                                                <th className="p-2 text-left">versione</th>
+                                                <th className="p-2 text-left">produttore</th>
+                                                <th className="p-2 text-left">prezzo</th>
+                                                <th className="p-2 text-left">gratuito</th>
+                                                <th className="p-2 text-left">data_rilascio</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr className="border-b">
+                                                <td className="p-2">1</td>
+                                                <td className="p-2">VS Code</td>
+                                                <td className="p-2">1.85</td>
+                                                <td className="p-2">Microsoft</td>
+                                                <td className="p-2">0.00</td>
+                                                <td className="p-2">1</td>
+                                                <td className="p-2">2024-01-01</td>
+                                            </tr>
+                                            <tr className="border-b bg-green-50 font-bold">
+                                                <td className="p-2">2</td>
+                                                <td className="p-2">Photoshop</td>
+                                                <td className="p-2">25.0</td>
+                                                <td className="p-2">Adobe</td>
+                                                <td className="p-2">239.88</td>
+                                                <td className="p-2">0</td>
+                                                <td className="p-2">2024-10-01</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div className="mt-4 p-3 bg-green-100 rounded border border-green-300">
+                                    <div className="flex items-center space-x-2">
+                                        <CheckCircle className="text-green-600" size={20} />
+                                        <span className="font-semibold text-green-700">Record salvato con ID=2</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="text-center text-sm text-gray-600">
+                                File: <code className="bg-gray-100 px-2 py-1 rounded">db.sqlite3</code>
+                            </div>
+                        </div>
+                    )
+                },
+                {
+                    title: "Step 8: Response Journey Back",
+                    subtitle: "Dal Database a Postman",
+                    content: (
+                        <div className="space-y-6">
+                            <div className="bg-gradient-to-r from-cyan-50 to-orange-50 p-6 rounded-lg border-2 border-gray-300">
+                                <h3 className="text-xl font-bold text-gray-700 mb-4 text-center">⬅️ Viaggio di ritorno</h3>
+                                <div className="space-y-3">
+                                    <div className="bg-white p-3 rounded shadow-sm">
+                                        <div className="font-bold text-sm">1. Database → ORM</div>
+                                        <div className="text-xs text-gray-600">Oggetto Software con ID=2</div>
+                                    </div>
+                                    <div className="flex justify-center">
+                                        <div className="text-2xl">⬆️</div>
+                                    </div>
+                                    <div className="bg-white p-3 rounded shadow-sm">
+                                        <div className="font-bold text-sm">2. ORM → Serializer</div>
+                                        <div className="text-xs text-gray-600">Python object → dict</div>
+                                    </div>
+                                    <div className="flex justify-center">
+                                        <div className="text-2xl">⬆️</div>
+                                    </div>
+                                    <div className="bg-white p-3 rounded shadow-sm">
+                                        <div className="font-bold text-sm">3. Serializer → View</div>
+                                        <div className="text-xs text-gray-600">serializer.data (validated dict)</div>
+                                    </div>
+                                    <div className="flex justify-center">
+                                        <div className="text-2xl">⬆️</div>
+                                    </div>
+                                    <div className="bg-white p-3 rounded shadow-sm">
+                                        <div className="font-bold text-sm">4. View → Response</div>
+                                        <div className="text-xs text-gray-600">Response(data, status=201)</div>
+                                    </div>
+                                    <div className="flex justify-center">
+                                        <div className="text-2xl">⬆️</div>
+                                    </div>
+                                    <div className="bg-white p-3 rounded shadow-sm">
+                                        <div className="font-bold text-sm">5. DRF → JSON</div>
+                                        <div className="text-xs text-gray-600">dict → JSON string</div>
+                                    </div>
+                                    <div className="flex justify-center">
+                                        <div className="text-2xl">⬆️</div>
+                                    </div>
+                                    <div className="bg-white p-3 rounded shadow-sm">
+                                        <div className="font-bold text-sm">6. Django → HTTP Response</div>
+                                        <div className="text-xs text-gray-600">Status 201 Created + JSON body</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                },
+                {
+                    title: "Step 9: Final Response",
+                    subtitle: "Postman riceve la risposta",
+                    content: (
+                        <div className="space-y-6">
+                            <div className="bg-orange-50 p-6 rounded-lg border-2 border-orange-300">
+                                <div className="flex items-center space-x-4 mb-4">
+                                    <div className="text-4xl">📬</div>
+                                    <h3 className="text-2xl font-bold text-orange-700">Postman Response</h3>
+                                </div>
+                                <div className="bg-white p-4 rounded">
+                                    <div className="mb-3">
+                                        <span className="inline-block bg-green-500 text-white px-3 py-1 rounded font-bold">
+                                            201 Created
+                                        </span>
+                                    </div>
+                                    <div className="font-mono text-xs">
+                                        <div className="text-gray-700 mb-2">Headers:</div>
+                                        <div className="ml-4 text-gray-600 mb-3">
+                                            Content-Type: application/json<br/>
+                                            Content-Length: 156
+                                        </div>
+                                        <div className="text-gray-700 mb-2">Body:</div>
+                                        <pre className="ml-4 text-gray-600 bg-gray-50 p-3 rounded">{`{
+  "id": 2,
+  "nome": "Photoshop",
+  "versione": "25.0",
+  "produttore": "Adobe",
+  "prezzo": "239.88",
+  "gratuito": false,
+  "data_rilascio": "2024-10-01"
+}`}</pre>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="bg-green-50 p-4 rounded border border-green-300">
+                                <div className="flex items-center space-x-3">
+                                    <CheckCircle className="text-green-600" size={32} />
+                                    <div>
+                                        <div className="font-bold text-green-700">✓ Richiesta completata con successo!</div>
+                                        <div className="text-sm text-gray-600">Software creato nel database con ID=2</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                },
+                {
+                    title: "Complete Flow Diagram",
+                    subtitle: "Visione d'insieme",
+                    content: (
+                        <div className="space-y-4">
+                            <div className="bg-gradient-to-b from-blue-50 to-purple-50 p-6 rounded-lg border-2 border-gray-300">
+                                <div className="space-y-2 text-sm">
+                                    <div className="flex items-center space-x-3 bg-white p-3 rounded shadow">
+                                        <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">2</div>
+                                        <div className="flex-1">
+                                            <div className="font-bold">Django URL Resolver</div>
+                                            <div className="text-xs text-gray-600">urls.py → trova la view giusta</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="flex items-center space-x-3 bg-white p-3 rounded shadow">
+                                        <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white font-bold">3</div>
+                                        <div className="flex-1">
+                                            <div className="font-bold">Middleware</div>
+                                            <div className="text-xs text-gray-600">Security, Session, Auth...</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="flex items-center space-x-3 bg-white p-3 rounded shadow">
+                                        <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white font-bold">4</div>
+                                        <div className="flex-1">
+                                            <div className="font-bold">View Function</div>
+                                            <div className="text-xs text-gray-600">views.crea_software(request)</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="flex items-center space-x-3 bg-white p-3 rounded shadow">
+                                        <div className="w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center text-white font-bold">5</div>
+                                        <div className="flex-1">
+                                            <div className="font-bold">Serializer</div>
+                                            <div className="text-xs text-gray-600">Validazione + conversione dati</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="flex items-center space-x-3 bg-white p-3 rounded shadow">
+                                        <div className="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center text-white font-bold">6</div>
+                                        <div className="flex-1">
+                                            <div className="font-bold">Django ORM</div>
+                                            <div className="text-xs text-gray-600">Python → SQL query</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="flex items-center space-x-3 bg-white p-3 rounded shadow">
+                                        <div className="w-8 h-8 bg-slate-500 rounded-full flex items-center justify-center text-white font-bold">7</div>
+                                        <div className="flex-1">
+                                            <div className="font-bold">Database</div>
+                                            <div className="text-xs text-gray-600">SQLite salva il record</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="flex items-center space-x-3 bg-gradient-to-r from-cyan-100 to-orange-100 p-3 rounded shadow border-2 border-green-400">
+                                        <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white font-bold">8</div>
+                                        <div className="flex-1">
+                                            <div className="font-bold">Response ← Postman</div>
+                                            <div className="text-xs text-gray-600">201 Created + JSON con ID</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="text-center text-xs text-gray-500">
+                                ⏱️ Tempo totale: ~50-200ms (dipende dalla complessità)
+                            </div>
+                        </div>
+                    )
+                },
+                {
+                    title: "Key Components Summary",
+                    subtitle: "Componenti chiave di Django",
+                    content: (
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                <h4 className="font-bold text-blue-700 mb-2">📁 urls.py</h4>
+                                <p className="text-xs text-gray-600">Mappa URL → View functions</p>
+                            </div>
+                            
+                            <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                                <h4 className="font-bold text-green-700 mb-2">👁️ views.py</h4>
+                                <p className="text-xs text-gray-600">Business logic & request handling</p>
+                            </div>
+                            
+                            <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                                <h4 className="font-bold text-purple-700 mb-2">🗄️ models.py</h4>
+                                <p className="text-xs text-gray-600">Struttura database (ORM)</p>
+                            </div>
+                            
+                            <div className="bg-indigo-50 p-4 rounded-lg border border-indigo-200">
+                                <h4 className="font-bold text-indigo-700 mb-2">🔄 serializers.py</h4>
+                                <p className="text-xs text-gray-600">Validazione & JSON ↔ Python</p>
+                            </div>
+                            
+                            <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                                <h4 className="font-bold text-yellow-700 mb-2">⚙️ settings.py</h4>
+                                <p className="text-xs text-gray-600">Configurazione globale</p>
+                            </div>
+                            
+                            <div className="bg-cyan-50 p-4 rounded-lg border border-cyan-200">
+                                <h4 className="font-bold text-cyan-700 mb-2">🗃️ Database</h4>
+                                <p className="text-xs text-gray-600">SQLite/PostgreSQL/MySQL</p>
+                            </div>
+                            
+                            <div className="col-span-2 bg-orange-50 p-4 rounded-lg border border-orange-200">
+                                <h4 className="font-bold text-orange-700 mb-2">🔌 Django REST Framework</h4>
+                                <p className="text-xs text-gray-600">@api_view, Response, Serializers, status codes</p>
+                            </div>
+                        </div>
+                    )
+                }
+            ];
+
+            const nextSlide = () => {
+                if (currentSlide < slides.length - 1) {
+                    setCurrentSlide(currentSlide + 1);
+                }
+            };
+
+            const prevSlide = () => {
+                if (currentSlide > 0) {
+                    setCurrentSlide(currentSlide - 1);
+                }
+            };
+
+            return (
+                <div className="w-full h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col">
+                    <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 shadow-lg">
+                        <h2 className="text-3xl font-bold">{slides[currentSlide].title}</h2>
+                        <p className="text-blue-100 mt-1">{slides[currentSlide].subtitle}</p>
+                    </div>
+
+                    <div className="flex-1 p-8 overflow-y-auto">
+                        <div className="max-w-5xl mx-auto">
+                            {slides[currentSlide].content}
+                        </div>
+                    </div>
+
+                    <div className="bg-white border-t border-gray-200 p-4 shadow-lg">
+                        <div className="max-w-5xl mx-auto flex items-center justify-between">
+                            <button
+                                onClick={prevSlide}
+                                disabled={currentSlide === 0}
+                                className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-semibold transition-all ${
+                                    currentSlide === 0
+                                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                        : 'bg-blue-500 text-white hover:bg-blue-600 shadow-md hover:shadow-lg'
+                                }`}
+                            >
+                                <ChevronLeft size={20} />
+                                <span>Precedente</span>
+                            </button>
+
+                            <div className="flex items-center space-x-3">
+                                <span className="text-sm text-gray-600">
+                                    Slide {currentSlide + 1} di {slides.length}
+                                </span>
+                                <div className="flex space-x-1">
+                                    {slides.map((_, index) => (
+                                        <button
+                                            key={index}
+                                            onClick={() => setCurrentSlide(index)}
+                                            className={`w-2 h-2 rounded-full transition-all ${
+                                                index === currentSlide
+                                                    ? 'bg-blue-600 w-8'
+                                                    : 'bg-gray-300 hover:bg-gray-400'
+                                            }`}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={nextSlide}
+                                disabled={currentSlide === slides.length - 1}
+                                className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-semibold transition-all ${
+                                    currentSlide === slides.length - 1
+                                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                        : 'bg-blue-500 text-white hover:bg-blue-600 shadow-md hover:shadow-lg'
+                                }`}
+                            >
+                                <span>Successivo</span>
+                                <ChevronRight size={20} />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<DjangoFlowPresentation />, document.getElementById('root'));
+    </script>
+</body>
+</html>white p-3 rounded shadow">
+                                        <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold">1</div>
+                                        <div className="flex-1">
+                                            <div className="font-bold">Postman → HTTP Request</div>
+                                            <div className="text-xs text-gray-600">POST /api/software/create/ + JSON</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="flex items-center space-x-3 bg-
