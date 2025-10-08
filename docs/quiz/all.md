@@ -1,4 +1,3 @@
-
 # Quiz Corso Python - 30 Domande per Giorno
 
 ## GIORNO 1 - Fondamenti Python
