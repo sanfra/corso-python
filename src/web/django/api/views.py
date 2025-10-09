@@ -1,12 +1,11 @@
 # --- IMPORTAZIONI DJANGO REST FRAMEWORK ---
-from rest_framework.decorators import api_view,permission_classes, authentication_classes
-from rest_framework.permissions import AllowAny
+from rest_framework import viewsets, status
+from rest_framework.decorators import action, api_view
+from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework import status
 
 # --- IMPORTAZIONI DJANGO ORM ---
-from django.db.models import Count, Avg, Sum, Q
-from django.shortcuts import get_object_or_404
+from django.db.models import Count, Avg, Sum, Q, Max, Min
 
 # --- IMPORTAZIONI LOCALI ---
 from .models import Software, Azienda
@@ -17,449 +16,360 @@ from datetime import datetime
 
 
 # ============================================
-# AZIENDE - CRUD COMPLETO
+# CUSTOM PERMISSION - STRICT
 # ============================================
 
-@api_view(['GET'])
-def lista_aziende(request):
+class StrictDjangoModelPermissions(DjangoModelPermissions):
     """
-    GET /api/aziende/
+    Estende DjangoModelPermissions richiedendo permessi anche per le operazioni GET.
     
-    Restituisce tutte le aziende con numero di software prodotti.
+    Permessi richiesti:
+    - GET: view_<model>
+    - POST: add_<model>
+    - PUT/PATCH: change_<model>
+    - DELETE: delete_<model>
     """
-    # Query con annotazione (conta software per azienda)
-    aziende = Azienda.objects.annotate(
-        num_software=Count('software')
-    ).all()
-    
-    serializer = AziendaSerializer(aziende, many=True)
-    
-    return Response({
-        'count': aziende.count(),
-        'aziende': serializer.data
-    }, status=status.HTTP_200_OK)
-
-
-@api_view(['GET'])
-def dettaglio_azienda(request, azienda_id):
-    """
-    GET /api/aziende/<id>/
-    
-    Restituisce dettagli di una singola azienda.
-    """
-    try:
-        azienda = Azienda.objects.annotate(
-            num_software=Count('software')
-        ).get(id=azienda_id)
-        
-        serializer = AziendaSerializer(azienda)
-        
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    
-    except Azienda.DoesNotExist:
-        return Response(
-            {'errore': 'Azienda non trovata'},
-            status=status.HTTP_404_NOT_FOUND
-        )
-
-
-@api_view(['POST'])
-def crea_azienda(request):
-    """
-    POST /api/aziende/create/
-    
-    Crea una nuova azienda.
-    
-    Body JSON richiesto:
-    {
-        "nome": "Adobe Inc.",
-        "partita_iva": "12345678901",
-        "sede": "San Jose, California",
-        "email": "info@adobe.com",
-        "telefono": "+1-408-536-6000",
-        "sito_web": "https://www.adobe.com",
-        "descrizione": "Leader software creativo",
-        "data_fondazione": "1982-12-01"
+    perms_map = {
+        'GET': ['%(app_label)s.view_%(model_name)s'],      # ✅ AGGIUNTO controllo per GET
+        'OPTIONS': [],
+        'HEAD': [],
+        'POST': ['%(app_label)s.add_%(model_name)s'],
+        'PUT': ['%(app_label)s.change_%(model_name)s'],
+        'PATCH': ['%(app_label)s.change_%(model_name)s'],
+        'DELETE': ['%(app_label)s.delete_%(model_name)s'],
     }
-    """
-    serializer = AziendaSerializer(data=request.data)
-    
-    if serializer.is_valid(raise_exception=True):
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['PUT'])
-def aggiorna_azienda(request, azienda_id):
+# ============================================
+# AZIENDE - VIEWSET CON PERMESSI STRICT
+# ============================================
+
+class AziendaViewSet(viewsets.ModelViewSet):
     """
-    PUT /api/aziende/<id>/update/
+    ViewSet completo per Aziende con controllo permessi su TUTTE le operazioni.
     
-    Aggiorna completamente un'azienda (tutti i campi richiesti).
+    Permessi richiesti (gestiti dal pannello admin):
+    - view_azienda: GET (lista e dettaglio) ✅
+    - add_azienda: POST
+    - change_azienda: PUT, PATCH
+    - delete_azienda: DELETE
     """
-    try:
-        azienda = Azienda.objects.get(id=azienda_id)
-        serializer = AziendaSerializer(azienda, data=request.data)
+    queryset = Azienda.objects.annotate(num_software=Count('software')).all()
+    serializer_class = AziendaSerializer
+    permission_classes = [StrictDjangoModelPermissions]  # ✅ CORRETTO
+    
+    def list(self, request):
+        """GET /api/aziende/"""
+        aziende = self.get_queryset()
+        serializer = self.get_serializer(aziende, many=True)
+        
+        return Response({
+            'count': aziende.count(),
+            'aziende': serializer.data
+        })
+    
+    def retrieve(self, request, pk=None):
+        """GET /api/aziende/{id}/"""
+        try:
+            azienda = self.get_queryset().get(id=pk)
+            serializer = self.get_serializer(azienda)
+            return Response(serializer.data)
+        except Azienda.DoesNotExist:
+            return Response(
+                {'errore': 'Azienda non trovata'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+    
+    def create(self, request):
+        """POST /api/aziende/"""
+        serializer = self.get_serializer(data=request.data)
         
         if serializer.is_valid(raise_exception=True):
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-    except Azienda.DoesNotExist:
-        return Response(
-            {'errore': 'Azienda non trovata'},
-            status=status.HTTP_404_NOT_FOUND
-        )
+    def update(self, request, pk=None):
+        """PUT /api/aziende/{id}/"""
+        try:
+            azienda = Azienda.objects.get(id=pk)
+            serializer = self.get_serializer(azienda, data=request.data)
+            
+            if serializer.is_valid(raise_exception=True):
+                serializer.save()
+                return Response(serializer.data)
+            
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Azienda.DoesNotExist:
+            return Response(
+                {'errore': 'Azienda non trovata'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+    
+    def partial_update(self, request, pk=None):
+        """PATCH /api/aziende/{id}/"""
+        try:
+            azienda = Azienda.objects.get(id=pk)
+            serializer = self.get_serializer(azienda, data=request.data, partial=True)
+            
+            if serializer.is_valid(raise_exception=True):
+                serializer.save()
+                return Response(serializer.data)
+            
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Azienda.DoesNotExist:
+            return Response(
+                {'errore': 'Azienda non trovata'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+    
+    def destroy(self, request, pk=None):
+        """DELETE /api/aziende/{id}/"""
+        try:
+            azienda = Azienda.objects.get(id=pk)
+            nome_azienda = azienda.nome
+            num_software = azienda.software.count()
+            
+            azienda.delete()
+            
+            return Response({
+                'messaggio': f'Azienda "{nome_azienda}" eliminata con successo',
+                'software_eliminati': num_software
+            })
+        except Azienda.DoesNotExist:
+            return Response(
+                {'errore': 'Azienda non trovata'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+    
+    @action(detail=True, methods=['get'], url_path='software')
+    def software(self, request, pk=None):
+        """GET /api/aziende/{id}/software/"""
+        try:
+            azienda = Azienda.objects.get(id=pk)
+            software_list = azienda.software.all()
+            
+            serializer = SoftwareSerializer(software_list, many=True)
+            
+            return Response({
+                'azienda': {
+                    'id': azienda.id,
+                    'nome': azienda.nome
+                },
+                'count': software_list.count(),
+                'software': serializer.data
+            })
+        except Azienda.DoesNotExist:
+            return Response(
+                {'errore': 'Azienda non trovata'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+    
+    @action(detail=True, methods=['get'], url_path='statistiche')
+    def statistiche(self, request, pk=None):
+        """GET /api/aziende/{id}/statistiche/"""
+        try:
+            azienda = Azienda.objects.get(id=pk)
+            
+            stats = azienda.software.aggregate(
+                totale=Count('id'),
+                gratuiti=Count('id', filter=Q(gratuito=True)),
+                a_pagamento=Count('id', filter=Q(gratuito=False)),
+                prezzo_medio=Avg('prezzo'),
+                prezzo_totale=Sum('prezzo')
+            )
+            
+            return Response({
+                'azienda': {
+                    'id': azienda.id,
+                    'nome': azienda.nome
+                },
+                'software': {
+                    'totale': stats['totale'],
+                    'gratuiti': stats['gratuiti'],
+                    'a_pagamento': stats['a_pagamento'],
+                    'prezzo_medio': float(stats['prezzo_medio'] or 0),
+                    'valore_catalogo': float(stats['prezzo_totale'] or 0)
+                }
+            })
+        except Azienda.DoesNotExist:
+            return Response(
+                {'errore': 'Azienda non trovata'},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
 
-@api_view(['PATCH'])
-def aggiorna_parziale_azienda(request, azienda_id):
+# ============================================
+# SOFTWARE - VIEWSET CON PERMESSI STRICT
+# ============================================
+
+class SoftwareViewSet(viewsets.ModelViewSet):
     """
-    PATCH /api/aziende/<id>/patch/
+    ViewSet completo per Software con controllo permessi su TUTTE le operazioni.
     
-    Aggiorna parzialmente un'azienda (solo campi specificati).
-    
-    Body JSON (esempio - solo campi da modificare):
-    {
-        "email": "nuovo@email.com",
-        "telefono": "+39 06 1234567"
-    }
+    Permessi richiesti (gestiti dal pannello admin):
+    - view_software: GET (lista e dettaglio) ✅
+    - add_software: POST
+    - change_software: PUT, PATCH
+    - delete_software: DELETE
     """
-    try:
-        azienda = Azienda.objects.get(id=azienda_id)
-        serializer = AziendaSerializer(azienda, data=request.data, partial=True)
+    queryset = Software.objects.select_related('azienda').all()
+    serializer_class = SoftwareSerializer
+    permission_classes = [StrictDjangoModelPermissions]  # ✅ CORRETTO
+    
+    def list(self, request):
+        """GET /api/software/"""
+        software_list = self.get_queryset()
+        serializer = self.get_serializer(software_list, many=True)
+        
+        return Response({
+            'count': software_list.count(),
+            'software': serializer.data
+        })
+    
+    def retrieve(self, request, pk=None):
+        """GET /api/software/{id}/"""
+        try:
+            software = self.get_queryset().get(id=pk)
+            serializer = self.get_serializer(software)
+            return Response(serializer.data)
+        except Software.DoesNotExist:
+            return Response(
+                {'errore': 'Software non trovato'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+    
+    def create(self, request):
+        """POST /api/software/"""
+        serializer = self.get_serializer(data=request.data)
         
         if serializer.is_valid(raise_exception=True):
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-    except Azienda.DoesNotExist:
-        return Response(
-            {'errore': 'Azienda non trovata'},
-            status=status.HTTP_404_NOT_FOUND
-        )
-
-
-@api_view(['DELETE'])
-def elimina_azienda(request, azienda_id):
-    """
-    DELETE /api/aziende/<id>/delete/
+    def update(self, request, pk=None):
+        """PUT /api/software/{id}/"""
+        try:
+            software = Software.objects.get(id=pk)
+            serializer = self.get_serializer(software, data=request.data)
+            
+            if serializer.is_valid(raise_exception=True):
+                serializer.save()
+                return Response(serializer.data)
+            
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Software.DoesNotExist:
+            return Response(
+                {'errore': 'Software non trovato'},
+                status=status.HTTP_404_NOT_FOUND
+            )
     
-    Elimina un'azienda e TUTTI i suoi software (CASCADE).
-    """
-    try:
-        azienda = Azienda.objects.get(id=azienda_id)
-        nome_azienda = azienda.nome
-        num_software = azienda.software.count()
-        
-        # Elimina (CASCADE elimina anche i software)
-        azienda.delete()
+    def partial_update(self, request, pk=None):
+        """PATCH /api/software/{id}/"""
+        try:
+            software = Software.objects.get(id=pk)
+            serializer = self.get_serializer(software, data=request.data, partial=True)
+            
+            if serializer.is_valid(raise_exception=True):
+                serializer.save()
+                return Response(serializer.data)
+            
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Software.DoesNotExist:
+            return Response(
+                {'errore': 'Software non trovato'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+    
+    def destroy(self, request, pk=None):
+        """DELETE /api/software/{id}/"""
+        try:
+            software = Software.objects.get(id=pk)
+            nome_software = software.nome
+            
+            software.delete()
+            
+            return Response({
+                'messaggio': f'Software "{nome_software}" eliminato con successo'
+            })
+        except Software.DoesNotExist:
+            return Response(
+                {'errore': 'Software non trovato'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+    
+    @action(detail=False, methods=['get'], url_path='gratuiti')
+    def gratuiti(self, request):
+        """GET /api/software/gratuiti/"""
+        software_list = self.get_queryset().filter(gratuito=True)
+        serializer = self.get_serializer(software_list, many=True)
         
         return Response({
-            'messaggio': f'Azienda "{nome_azienda}" eliminata con successo',
-            'software_eliminati': num_software
-        }, status=status.HTTP_200_OK)
+            'count': software_list.count(),
+            'software': serializer.data
+        })
     
-    except Azienda.DoesNotExist:
-        return Response(
-            {'errore': 'Azienda non trovata'},
-            status=status.HTTP_404_NOT_FOUND
-        )
-
-
-@api_view(['GET'])
-def software_per_azienda(request, azienda_id):
-    """
-    GET /api/aziende/<id>/software/
-    
-    Restituisce tutti i software di una specifica azienda.
-    """
-    try:
-        azienda = Azienda.objects.get(id=azienda_id)
-        
-        # ✅ Relazione inversa con related_name='software'
-        software_list = azienda.software.all()
-        
-        serializer = SoftwareSerializer(software_list, many=True)
+    @action(detail=False, methods=['get'], url_path='pagamento')
+    def pagamento(self, request):
+        """GET /api/software/pagamento/"""
+        software_list = self.get_queryset().filter(gratuito=False)
+        serializer = self.get_serializer(software_list, many=True)
         
         return Response({
-            'azienda': {
-                'id': azienda.id,
-                'nome': azienda.nome
+            'count': software_list.count(),
+            'software': serializer.data
+        })
+    
+    @action(detail=False, methods=['get'], url_path='cerca')
+    def cerca(self, request):
+        """GET /api/software/cerca/?q=photoshop"""
+        query = request.query_params.get('q', '')
+        
+        if not query:
+            return Response({
+                'errore': 'Parametro "q" mancante'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        software_list = self.get_queryset().filter(
+            Q(nome__icontains=query) | Q(azienda__nome__icontains=query)
+        )
+        
+        serializer = self.get_serializer(software_list, many=True)
+        
+        return Response({
+            'query': query,
+            'count': software_list.count(),
+            'risultati': serializer.data
+        })
+    
+    @action(detail=False, methods=['get'], url_path='filtra')
+    def filtra(self, request):
+        """GET /api/software/filtra/?min=0&max=100"""
+        prezzo_min = float(request.query_params.get('min', 0))
+        prezzo_max = request.query_params.get('max')
+        
+        software_list = self.get_queryset().filter(prezzo__gte=prezzo_min)
+        
+        if prezzo_max:
+            software_list = software_list.filter(prezzo__lte=float(prezzo_max))
+        
+        serializer = self.get_serializer(software_list, many=True)
+        
+        return Response({
+            'filtro': {
+                'prezzo_min': prezzo_min,
+                'prezzo_max': prezzo_max if prezzo_max else 'illimitato'
             },
             'count': software_list.count(),
             'software': serializer.data
-        }, status=status.HTTP_200_OK)
-    
-    except Azienda.DoesNotExist:
-        return Response(
-            {'errore': 'Azienda non trovata'},
-            status=status.HTTP_404_NOT_FOUND
-        )
+        })
 
 
 # ============================================
-# SOFTWARE - CRUD COMPLETO
-# ============================================
-
-@api_view(['GET'])
-def lista_software(request):
-    """
-    GET /api/software/
-    
-    Restituisce tutti i software con informazioni azienda.
-    
-    ✅ Ottimizzato con select_related per JOIN efficiente.
-    """
-    # ✅ select_related('azienda') fa JOIN in una sola query
-    software_list = Software.objects.select_related('azienda').all()
-    
-    serializer = SoftwareSerializer(software_list, many=True)
-    
-    return Response({
-        'count': software_list.count(),
-        'software': serializer.data
-    }, status=status.HTTP_200_OK)
-
-
-@api_view(['GET'])
-def dettaglio_software(request, software_id):
-    """
-    GET /api/software/<id>/
-    
-    Restituisce dettagli di un singolo software con info azienda.
-    """
-    try:
-        # ✅ select_related per includere dati azienda
-        software = Software.objects.select_related('azienda').get(id=software_id)
-        
-        serializer = SoftwareSerializer(software)
-        
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    
-    except Software.DoesNotExist:
-        return Response(
-            {'errore': 'Software non trovato'},
-            status=status.HTTP_404_NOT_FOUND
-        )
-
-
-@api_view(['POST'])
-def crea_software(request):
-    """
-    POST /api/software/create/
-    
-    Crea un nuovo software.
-    
-    Body JSON richiesto:
-    {
-        "nome": "Photoshop",
-        "versione": "25.0",
-        "azienda": 1,  ← ID dell'azienda (obbligatorio)
-        "prezzo": "239.88",
-        "gratuito": false,
-        "data_rilascio": "2024-10-01",
-        "descrizione": "Software per editing foto"
-    }
-    """
-    serializer = SoftwareSerializer(data=request.data)
-    
-    if serializer.is_valid(raise_exception=True):
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-@api_view(['PUT'])
-def aggiorna_software(request, software_id):
-    """
-    PUT /api/software/<id>/update/
-    
-    Aggiorna completamente un software (tutti i campi).
-    """
-    try:
-        software = Software.objects.get(id=software_id)
-        serializer = SoftwareSerializer(software, data=request.data)
-        
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    except Software.DoesNotExist:
-        return Response(
-            {'errore': 'Software non trovato'},
-            status=status.HTTP_404_NOT_FOUND
-        )
-
-
-@api_view(['PATCH'])
-def aggiorna_parziale_software(request, software_id):
-    """
-    PATCH /api/software/<id>/patch/
-    
-    Aggiorna parzialmente un software (solo campi specificati).
-    
-    Body JSON (esempio):
-    {
-        "versione": "25.1",
-        "prezzo": "199.99"
-    }
-    """
-    try:
-        software = Software.objects.get(id=software_id)
-        serializer = SoftwareSerializer(software, data=request.data, partial=True)
-        
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    except Software.DoesNotExist:
-        return Response(
-            {'errore': 'Software non trovato'},
-            status=status.HTTP_404_NOT_FOUND
-        )
-
-
-@api_view(['DELETE'])
-def elimina_software(request, software_id):
-    """
-    DELETE /api/software/<id>/delete/
-    
-    Elimina un software dal database.
-    """
-    try:
-        software = Software.objects.get(id=software_id)
-        nome_software = software.nome
-        
-        software.delete()
-        
-        return Response({
-            'messaggio': f'Software "{nome_software}" eliminato con successo'
-        }, status=status.HTTP_200_OK)
-    
-    except Software.DoesNotExist:
-        return Response(
-            {'errore': 'Software non trovato'},
-            status=status.HTTP_404_NOT_FOUND
-        )
-
-
-# ============================================
-# FILTRI E RICERCHE
-# ============================================
-
-@api_view(['GET'])
-def software_gratuiti(request):
-    """
-    GET /api/software/gratuiti/
-    
-    Restituisce solo i software gratuiti.
-    """
-    # ✅ select_related per JOIN ottimizzata
-    software_list = Software.objects.select_related('azienda').filter(gratuito=True)
-    
-    serializer = SoftwareSerializer(software_list, many=True)
-    
-    return Response({
-        'count': software_list.count(),
-        'software': serializer.data
-    }, status=status.HTTP_200_OK)
-
-
-@api_view(['GET'])
-def software_a_pagamento(request):
-    """
-    GET /api/software/pagamento/
-    
-    Restituisce solo i software a pagamento.
-    """
-    software_list = Software.objects.select_related('azienda').filter(gratuito=False)
-    
-    serializer = SoftwareSerializer(software_list, many=True)
-    
-    return Response({
-        'count': software_list.count(),
-        'software': serializer.data
-    }, status=status.HTTP_200_OK)
-
-
-@api_view(['GET'])
-def cerca_software(request):
-    """
-    GET /api/software/cerca/?q=photoshop
-    
-    Cerca software per nome o nome azienda.
-    
-    Query params:
-    - q: termine di ricerca
-    """
-    query = request.query_params.get('q', '')
-    
-    if not query:
-        return Response({
-            'errore': 'Parametro "q" mancante'
-        }, status=status.HTTP_400_BAD_REQUEST)
-    
-    # ✅ Cerca in nome software O nome azienda (con JOIN)
-    # Q() permette query OR complesse
-    software_list = Software.objects.select_related('azienda').filter(
-        Q(nome__icontains=query) | Q(azienda__nome__icontains=query)
-    )
-    
-    serializer = SoftwareSerializer(software_list, many=True)
-    
-    return Response({
-        'query': query,
-        'count': software_list.count(),
-        'risultati': serializer.data
-    }, status=status.HTTP_200_OK)
-
-
-@api_view(['GET'])
-def filtra_per_prezzo(request):
-    """
-    GET /api/software/filtra/?min=0&max=100
-    
-    Filtra software per range di prezzo.
-    
-    Query params:
-    - min: prezzo minimo (default: 0)
-    - max: prezzo massimo (opzionale)
-    """
-    prezzo_min = float(request.query_params.get('min', 0))
-    prezzo_max = request.query_params.get('max')
-    
-    software_list = Software.objects.select_related('azienda').filter(
-        prezzo__gte=prezzo_min
-    )
-    
-    if prezzo_max:
-        software_list = software_list.filter(prezzo__lte=float(prezzo_max))
-    
-    serializer = SoftwareSerializer(software_list, many=True)
-    
-    return Response({
-        'filtro': {
-            'prezzo_min': prezzo_min,
-            'prezzo_max': prezzo_max if prezzo_max else 'illimitato'
-        },
-        'count': software_list.count(),
-        'software': serializer.data
-    }, status=status.HTTP_200_OK)
-
-
-# ============================================
-# STATISTICHE E AGGREGAZIONI
+# STATISTICHE (endpoint separato, richiede autenticazione)
 # ============================================
 
 @api_view(['GET'])
@@ -467,14 +377,16 @@ def statistiche_generali(request):
     """
     GET /api/statistiche/
     
-    Restituisce statistiche generali su software e aziende.
+    Restituisce statistiche generali (richiede solo autenticazione).
     """
-    from django.db.models import Avg, Max, Min
+    if not request.user.is_authenticated:
+        return Response(
+            {'errore': 'Autenticazione richiesta'},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
     
-    # Statistiche aziende
     num_aziende = Azienda.objects.count()
     
-    # Statistiche software
     stats_software = Software.objects.aggregate(
         totale=Count('id'),
         prezzo_medio=Avg('prezzo'),
@@ -484,7 +396,6 @@ def statistiche_generali(request):
         a_pagamento=Count('id', filter=Q(gratuito=False))
     )
     
-    # Azienda con più software
     azienda_top = Azienda.objects.annotate(
         num_software=Count('software')
     ).order_by('-num_software').first()
@@ -505,75 +416,26 @@ def statistiche_generali(request):
             'nome': azienda_top.nome if azienda_top else None,
             'num_software': azienda_top.num_software if azienda_top else 0
         }
-    }, status=status.HTTP_200_OK)
-
-
-@api_view(['GET'])
-def statistiche_azienda(request, azienda_id):
-    """
-    GET /api/aziende/<id>/statistiche/
-    
-    Statistiche dettagliate per una specifica azienda.
-    """
-    try:
-        azienda = Azienda.objects.get(id=azienda_id)
-        
-        # Statistiche software dell'azienda
-        stats = azienda.software.aggregate(
-            totale=Count('id'),
-            gratuiti=Count('id', filter=Q(gratuito=True)),
-            a_pagamento=Count('id', filter=Q(gratuito=False)),
-            prezzo_medio=Avg('prezzo'),
-            prezzo_totale=Sum('prezzo')
-        )
-        
-        return Response({
-            'azienda': {
-                'id': azienda.id,
-                'nome': azienda.nome
-            },
-            'software': {
-                'totale': stats['totale'],
-                'gratuiti': stats['gratuiti'],
-                'a_pagamento': stats['a_pagamento'],
-                'prezzo_medio': float(stats['prezzo_medio'] or 0),
-                'valore_catalogo': float(stats['prezzo_totale'] or 0)
-            }
-        }, status=status.HTTP_200_OK)
-    
-    except Azienda.DoesNotExist:
-        return Response(
-            {'errore': 'Azienda non trovata'},
-            status=status.HTTP_404_NOT_FOUND
-        )
+    })
 
 
 # ============================================
-# HELLO ENDPOINTS (TEST)
+# HELLO ENDPOINT (pubblico per test)
 # ============================================
 
-@api_view(['GET'])
-@permission_classes([AllowAny])   # rende pubblico
-@authentication_classes([])       # opzionale: salta parsing token
+@api_view(['GET', 'POST'])
 def hello_world(request):
-    
-    """GET /api/hello/ - Endpoint di test"""
+    """Endpoint di test pubblico (senza autenticazione)"""
     data = {
         'message': 'Hello from PWW API!',
         'method': request.method,
         'path': request.path,
-        'timestamp': datetime.now().isoformat()
-    }
-    return Response(data, status=status.HTTP_200_OK)
-
-
-@api_view(['POST'])
-def hello_post(request):
-    """POST /api/helloPost/ - Endpoint di test POST"""
-    data = {
-        'message': 'Hello from POST!',
         'timestamp': datetime.now().isoformat(),
-        'method': request.method,
-        'path': request.path,
+        'authenticated': request.user.is_authenticated,
+        'user': str(request.user) if request.user.is_authenticated else 'Anonymous'
     }
-    return Response(data, status=status.HTTP_200_OK)
+    
+    if request.method == 'POST':
+        data['received_data'] = request.data
+    
+    return Response(data)

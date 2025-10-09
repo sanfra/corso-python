@@ -1,100 +1,105 @@
-from django.urls import path
-from . import views
-
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
     TokenVerifyView,
 )
+from . import views
 
 
-# urlpatterns: lista che contiene tutti i pattern URL dell'app
-# Django controlla questa lista dall'alto verso il basso per trovare la corrispondenza
+# ============================================
+# ROUTER per ViewSet
+# ============================================
+
+# Il router genera automaticamente gli URL per i ViewSet
+router = DefaultRouter()
+
+# Registra i ViewSet
+# - basename: nome base per gli URL (usato per reverse())
+# - ViewSet gestisce automaticamente: list, create, retrieve, update, partial_update, destroy
+router.register(r'aziende', views.AziendaViewSet, basename='azienda')
+router.register(r'software', views.SoftwareViewSet, basename='software')
+
+
+# ============================================
+# URL PATTERNS
+# ============================================
+
 urlpatterns = [
-
+    # ============================================
+    # JWT AUTHENTICATION
+    # ============================================
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),
     
-
-
+    
     # ============================================
-    # HELLO ENDPOINTS (TEST)
+    # HELLO ENDPOINT (TEST)
     # ============================================
     path('hello/', views.hello_world, name='hello'),
-    path('helloPost/', views.hello_post, name='hello_post'),
     
     
     # ============================================
-    # AZIENDE - CRUD
-    # ============================================
-    
-    # Lista e creazione
-    path('aziende/', views.lista_aziende, name='lista_aziende'),
-    path('aziende/create/', views.crea_azienda, name='crea_azienda'),
-    
-    # ⚠️ IMPORTANTE: URL specifici PRIMA di quelli con parametri dinamici
-    
-    # Dettaglio, update, delete (con ID dinamico)
-    path('aziende/<int:azienda_id>/', views.dettaglio_azienda, name='dettaglio_azienda'),
-    path('aziende/<int:azienda_id>/update/', views.aggiorna_azienda, name='aggiorna_azienda'),
-    path('aziende/<int:azienda_id>/patch/', views.aggiorna_parziale_azienda, name='aggiorna_parziale_azienda'),
-    path('aziende/<int:azienda_id>/delete/', views.elimina_azienda, name='elimina_azienda'),
-    
-    # Relazioni e statistiche
-    path('aziende/<int:azienda_id>/software/', views.software_per_azienda, name='software_per_azienda'),
-    path('aziende/<int:azienda_id>/statistiche/', views.statistiche_azienda, name='statistiche_azienda'),
-    
-    
-    # ============================================
-    # SOFTWARE - CRUD
-    # ============================================
-    
-    # Lista e creazione
-    path('software/', views.lista_software, name='lista_software'),
-    path('software/create/', views.crea_software, name='crea_software'),
-    
-    # ⚠️ FILTRI E RICERCHE - Devono stare PRIMA degli URL con <int:software_id>
-    path('software/gratuiti/', views.software_gratuiti, name='software_gratuiti'),
-    path('software/pagamento/', views.software_a_pagamento, name='software_a_pagamento'),
-    path('software/cerca/', views.cerca_software, name='cerca_software'),
-    path('software/filtra/', views.filtra_per_prezzo, name='filtra_per_prezzo'),
-    
-    # Dettaglio, update, delete (con ID dinamico)
-    # ⚠️ Questi vanno DOPO i filtri sopra!
-    path('software/<int:software_id>/', views.dettaglio_software, name='dettaglio_software'),
-    path('software/<int:software_id>/update/', views.aggiorna_software, name='aggiorna_software'),
-    path('software/<int:software_id>/patch/', views.aggiorna_parziale_software, name='aggiorna_parziale_software'),
-    path('software/<int:software_id>/delete/', views.elimina_software, name='elimina_software'),
-    
-    
-    # ============================================
-    # STATISTICHE
+    # STATISTICHE (endpoint separato)
     # ============================================
     path('statistiche/', views.statistiche_generali, name='statistiche_generali'),
+    
+    
+    # ============================================
+    # INCLUDE ROUTER URLs
+    # ============================================
+    # Questo include tutti gli URL generati automaticamente dal router
+    path('', include(router.urls)),
 ]
 
 
 # ============================================
-# NOTE IMPORTANTI
+# URL GENERATI AUTOMATICAMENTE DAL ROUTER
 # ============================================
 
-# 1. ORDINE URL:
-#    ✅ URL fissi PRIMA (es: 'software/gratuiti/')
-#    ✅ URL dinamici DOPO (es: 'software/<int:id>/')
-#    Motivo: Django si ferma al primo match
+# AZIENDE:
+# GET    /aziende/                    → list (lista tutte le aziende)
+# POST   /aziende/                    → create (crea nuova azienda)
+# GET    /aziende/{id}/               → retrieve (dettaglio azienda)
+# PUT    /aziende/{id}/               → update (aggiorna azienda completa)
+# PATCH  /aziende/{id}/               → partial_update (aggiorna parziale)
+# DELETE /aziende/{id}/               → destroy (elimina azienda)
+# GET    /aziende/{id}/software/      → custom action (software dell'azienda)
+# GET    /aziende/{id}/statistiche/   → custom action (statistiche azienda)
 
-# 2. PARAMETRI DINAMICI:
-#    <int:nome>    → cattura numero intero
-#    <str:nome>    → cattura stringa
-#    <slug:nome>   → cattura slug (lettere, numeri, -, _)
-#    <path:nome>   → cattura tutto, anche con /
+# SOFTWARE:
+# GET    /software/                   → list (lista tutti i software)
+# POST   /software/                   → create (crea nuovo software)
+# GET    /software/{id}/              → retrieve (dettaglio software)
+# PUT    /software/{id}/              → update (aggiorna software completo)
+# PATCH  /software/{id}/              → partial_update (aggiorna parziale)
+# DELETE /software/{id}/              → destroy (elimina software)
+# GET    /software/gratuiti/          → custom action (software gratuiti)
+# GET    /software/pagamento/         → custom action (software a pagamento)
+# GET    /software/cerca/?q=query     → custom action (cerca software)
+# GET    /software/filtra/?min=&max=  → custom action (filtra per prezzo)
 
-# 3. NAME:
-#    Usato per reverse URL: reverse('lista_software') → '/api/software/'
-#    Utile nei template e redirect
 
-# 4. TRAILING SLASH:
-#    Django preferisce URL con / finale
-#    /api/software/ ✅ (con slash)
-#    /api/software  → redirect automatico
+# ============================================
+# VANTAGGI DEL ROUTER
+# ============================================
+
+# 1. AUTOMATICO: Genera tutti gli URL CRUD standard
+# 2. CONSISTENTE: Struttura URL uniforme per tutti i ViewSet
+# 3. MENO CODICE: Non serve scrivere manualmente ogni path()
+# 4. CUSTOM ACTIONS: @action() crea automaticamente URL custom
+# 5. BROWSABLE API: Supporto completo per la UI di DRF
+
+
+# ============================================
+# REVERSE URL (come usarli nel codice)
+# ============================================
+
+# Da codice Python:
+# reverse('azienda-list')              → /aziende/
+# reverse('azienda-detail', args=[1])  → /aziende/1/
+# reverse('azienda-software', args=[1]) → /aziende/1/software/
+# reverse('software-list')             → /software/
+# reverse('software-gratuiti')         → /software/gratuiti/

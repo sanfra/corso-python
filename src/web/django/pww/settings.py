@@ -142,7 +142,7 @@ REST_FRAMEWORK_disable = {
     
     # Permessi di default
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',  # ← Richiede autenticazione
+         "rest_framework.permissions.DjangoModelPermissions",
     ],
 }
 
@@ -156,7 +156,7 @@ REST_FRAMEWORK = {
     
     # Permessi di default
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
+       "rest_framework.permissions.DjangoModelPermissions",
     ],
 }
 
@@ -164,7 +164,7 @@ REST_FRAMEWORK = {
 from datetime import timedelta
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=1),  # Token valido per 60 minuti
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),  # Token valido per 60 minuti
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),     # Refresh valido per 7 giorni
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
