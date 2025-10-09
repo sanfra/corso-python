@@ -102,6 +102,157 @@ python manage.py createsuperuser
 
 python manage.py **test** api.tests.AziendaModelTest --verbosity**=**2
 
+
+### **PASSO 1: Import**
+
+python
+
+```python
+from django.test import TestCase
+```
+
+**Cosa fa:**
+
+* Importa la classe base `TestCase` di Django
+* `TestCase` è una classe speciale che:
+  * Crea un **database temporaneo** prima di ogni test
+  * Lo **distrugge dopo** ogni test
+  * Usa **transazioni** per isolare i test (ogni test parte "pulito")
+
+---
+
+### **PASSO 2: Import dei modelli**
+
+python
+
+```python
+from api.models import Azienda, Software
+```
+
+**Cosa fa:**
+
+* Importa i modelli dal tuo codice
+* Usa import **assoluto** (`api.models`) invece di relativo (`.models`)
+* Permette di creare/leggere/modificare oggetti nel database di test
+
+---
+
+### **PASSO 3: Definizione della classe di test**
+
+python
+
+```python
+classAziendaModelTest(TestCase):
+"""Test per il modello Azienda"""
+```
+
+**Cosa fa:**
+
+* Crea una classe che eredita da `TestCase`
+* Il nome **deve** iniziare o finire con `Test` per essere riconosciuto
+* Può contenere più metodi di test
+
+**Convenzioni di naming:**
+
+* `TestAzienda` ✅
+* `AziendaTest` ✅
+* `AziendaModelTest` ✅ (più descrittivo)
+* `MioTest` ❌ (poco chiaro)
+
+---
+
+### **PASSO 4: Definizione del metodo di test**
+
+python
+
+```python
+deftest_azienda_creation(self):
+"""Test creazione azienda su DB temporaneo"""
+```
+
+**Cosa fa:**
+
+* Definisce un singolo test
+* Il nome **deve** iniziare con `test_` (obbligatorio!)
+* Django esegue automaticamente tutti i metodi che iniziano con `test_`
+
+**Cosa succede prima di questo metodo:**
+
+1. Django crea un database SQLite temporaneo (es: `test_db.sqlite3`)
+2. Esegue tutte le migrations (`CREATE TABLE api_azienda ...`)
+3. Il database è vuoto e pronto
+
+---
+
+### **PASSO 5: Creazione dell'oggetto**
+
+python
+
+```python
+azienda = Azienda.objects.create(
+    nome="Microsoft",
+    partita_iva="12345678901",
+    sede="Redmond, WA",
+    email="info@microsoft.com"
+)
+```
+
+**Cosa fa, riga per riga:**
+
+1. `Azienda.objects.create(...)` chiama il Manager di Django
+2. Django crea un'istanza del modello `Azienda`
+3. Django esegue questa **query SQL** sul database di test:
+
+sql
+
+```sql
+INSERTINTO api_azienda (
+    nome, 
+    partita_iva, 
+    sede, 
+    email,
+    creata_il,-- auto_now_add=True
+    modificata_il     -- auto_now=True
+)VALUES(
+'Microsoft',
+'12345678901',
+'Redmond, WA',
+'info@microsoft.com',
+'2025-10-09 12:34:56',-- timestamp automatico
+'2025-10-09 12:34:56'-- timestamp automatico
+);
+```
+
+4. Django restituisce l'oggetto `azienda` con tutti i campi popolati (incluso l'`id` auto-generato)
+5. L'oggetto è salvato nel **database temporaneo** (NON nel tuo database reale!)
+
+**Stato del database dopo questo comando:**
+
+```
+api_azienda:
++----+------------+---------------+-------------+---------------------------+
+| id | nome       | partita_iva   | sede        | email                     |
++----+------------+---------------+-------------+---------------------------+
+|  1 | Microsoft  | 12345678901   | Redmond, WA | info@microsoft.com        |
++----+------------+---------------+-------------+---------------------------+
+```
+
+---
+
+### **PASSO 6: Verifica (Assertions)**
+
+python
+
+```python
+self.assertEqual(azienda.nome,"Microsoft")
+```
+
+**Cosa fa:**
+
+* `assertEqual(A, B)` verifica che A sia uguale a B
+* Se `azienda.nome` è "Microsoft" → ✅ Test continua
+* Se `azienda.nome` è diverso → ❌ Test fallisce immediatamente con errore
+
 ### **6. Comandi utili**
 
 bash
