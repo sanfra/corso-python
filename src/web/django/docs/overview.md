@@ -97,6 +97,37 @@ pip install djangorestframework-simplejwt
 python manage.py createsuperuser
 
 
+
+## **Come eseguire i test**
+
+python manage.py **test** api.tests.AziendaModelTest --verbosity**=**2
+
+### **6. Comandi utili**
+
+bash
+
+```bash
+# Test con pattern specifico
+python manage.py test --pattern="test_*.py"
+
+# Test paralleli (più veloce)
+python manage.py test --parallel
+
+# Ferma al primo errore
+python manage.py test --failfast
+
+# Debug mode
+python manage.py test --debug-mode
+```
+
+Vuoi che ti prepari un file `tests.py` completo per il tuo progetto? 🧪
+
+Retry
+
+[Claude can make mistakes. **Please double-check responses.**](https://support.anthropic.com/en/articles/8525154-claude-is-providing-incorrect-or-misleading-responses-what-s-going-on)
+
+[ ]
+
 # Virtual Environment, Requirements e Django (Windows)
 
 ## 🎯 Progetto: PWW (Python Web Workshop)
